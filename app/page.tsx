@@ -360,6 +360,8 @@ setLoading(false);
 
 /* ---------------- DOWNLOAD REPORT ---------------- */
 
+/* ---------------- DOWNLOAD REPORT ---------------- */
+
 function downloadReport(){
 
 if(!reportRef.current)return;
@@ -370,13 +372,36 @@ if(buttons)buttons.style.display="none";
 
 html2canvas(reportRef.current).then(canvas=>{
 
+const image=canvas.toDataURL("image/png");
+
+/* detect mobile */
+
+const isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+if(isMobile){
+
+/* open image in new tab for mobile */
+
+const newTab=window.open();
+if(newTab){
+newTab.document.write(`<img src="${image}" style="width:100%">`);
+}
+
+}else{
+
+/* normal download for desktop */
+
 const link=document.createElement("a");
 
 link.download="mychatscore.png";
 
-link.href=canvas.toDataURL();
+link.href=image;
 
+document.body.appendChild(link);
 link.click();
+document.body.removeChild(link);
+
+}
 
 if(buttons)buttons.style.display="flex";
 

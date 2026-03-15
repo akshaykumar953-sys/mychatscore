@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import html2canvas from "html2canvas";
 import Tesseract from "tesseract.js";
 
@@ -50,8 +50,21 @@ const [loading,setLoading]=useState(false);
 const [chatOpen,setChatOpen]=useState(false);
 const [userEmail,setUserEmail]=useState("");
 const [message,setMessage]=useState("");
-
+const [showGreeting,setShowGreeting] = useState(true);
 const reportRef=useRef<HTMLDivElement>(null);
+
+
+useEffect(()=>{
+
+const timer = setTimeout(()=>{
+
+setShowGreeting(false);
+
+},10000);
+
+return ()=>clearTimeout(timer);
+
+},[]);
 
 /* ---------------- NAME DETECTION ---------------- */
 
@@ -137,11 +150,12 @@ return match?match[1]:"—";
 
 }
 
+
 function parseVerdict(){
 
-const match=result.match(/Verdict:(.*)/s);
+const match=result.match(/Verdict:([\s\S]*)/);
 
-return match?match[1].trim():"";
+return match ? match[1].trim() : "";
 
 }
 
@@ -212,6 +226,18 @@ alert("Paste chat first");
 return;
 }
 
+/* text length limit */
+
+const MAX_CHAT_LENGTH = 3000;
+
+if(chatText.length > MAX_CHAT_LENGTH){
+
+alert("Chat too long. Please paste a shorter conversation.");
+
+return;
+
+}
+
 setLoading(true);
 setResult("");
 
@@ -241,10 +267,13 @@ setLoading(false);
 
 function loadDemoChat(){
 
-setChatText(`Akshay: Hey what are you doing tonight?
-Arvind: Nothing much
-Akshay: Want to grab coffee tomorrow?
-Arvind: Sure sounds good :)`);
+setChatText(`Alex: Hey, how was your day?
+Sam: Pretty good actually! Busy though.
+Alex: Same here 😅
+Sam: What are you doing this weekend?
+Alex: Nothing planned yet, maybe relaxing.
+Sam: We should grab coffee sometime 🙂
+Alex: I'd like that!`);
 
 }
 
@@ -257,8 +286,20 @@ setResult("");
 
 async function handleImageUpload(e:any){
 
-const file=e.target.files?.[0];
+const file = e.target.files[0];
 if(!file) return;
+
+/* file size limit */
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+if(file.size > MAX_FILE_SIZE){
+
+alert("Screenshot too large. Maximum size is 5MB.");
+
+return;
+
+}
 
 try{
 
@@ -280,7 +321,7 @@ img.onload=async()=>{
 const canvas=document.createElement("canvas");
 const ctx=canvas.getContext("2d");
 
-const MAX_WIDTH=1200;
+const MAX_WIDTH=1500;
 
 let width=img.width;
 let height=img.height;
@@ -295,9 +336,8 @@ canvas.height=height;
 
 ctx?.drawImage(img,0,0,width,height);
 
-const {data}=await Tesseract.recognize(canvas,"eng",{
-tessedit_pageseg_mode:6
-});
+
+const { data } = await Tesseract.recognize(canvas, "eng");
 
 setChatText(data.text);
 
@@ -375,18 +415,18 @@ copyReport();
 async function sendFeedback(){
 
 if(!message.trim()){
-alert("Write message");
+alert("Please enter a message");
 return;
 }
 
 if(!userEmail.trim()){
-alert("Enter email");
+alert("Please enter your email");
 return;
 }
 
 try{
 
-await fetch("/api/feedback",{
+const res = await fetch("/api/feedback",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
@@ -395,15 +435,22 @@ message
 })
 });
 
+const data = await res.json();
+
+if(!res.ok){
+alert(data.error || "Failed to send feedback");
+return;
+}
+
 alert("Feedback sent");
 
 setUserEmail("");
 setMessage("");
 setChatOpen(false);
 
-}catch{
+}catch(error){
 
-alert("Feedback failed");
+alert("Server error");
 
 }
 
@@ -501,7 +548,8 @@ onChange={handleImageUpload}
 
 <textarea
 rows={6}
-placeholder="Paste your chat conversation..."
+maxLength={3000}
+placeholder="Paste your chat conversation (max ~300 messages)"
 value={chatText}
 onChange={(e)=>setChatText(e.target.value)}
 />
@@ -703,6 +751,63 @@ AI insights are generated automatically and may not always be accurate.
 </div>
 
 )}
+
+{/* AVI FEEDBACK WIDGET */}
+
+<div className="feedbackWidget">
+
+{/* AVI GREETING */}
+
+{!chatOpen && showGreeting && (
+<div className="aviGreeting">
+👋 Hi, I'm Avi. Need help or want to share feedback?
+</div>
+)}
+
+<button
+className="feedbackButton"
+onClick={()=>setChatOpen(!chatOpen)}
+>
+💬 Avi
+</button>
+
+{chatOpen && (
+
+<div className="feedbackPanel">
+
+<h4>👋 Avi Feedback</h4>
+
+<p className="aviText">
+Need help or want to report something?
+</p>
+
+<input
+type="email"
+placeholder="your@email.com"
+value={userEmail}
+onChange={(e)=>setUserEmail(e.target.value)}
+/>
+
+<textarea
+placeholder="Your message..."
+maxLength={500}
+value={message}
+onChange={(e)=>setMessage(e.target.value)}
+/>
+
+<div className="charCounter">
+{message.length}/500
+</div>
+
+<button onClick={sendFeedback}>
+Send
+</button>
+
+</div>
+
+)}
+
+</div>
 
 </main>
 
