@@ -379,12 +379,47 @@ const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 if(isIOS){
 
-/* iPhone Safari workaround */
-window.location.href = dataUrl;
+/* iPhone safe preview window */
+
+const w = window.open("");
+
+if(w){
+w.document.write(`
+<html>
+<head>
+<title>MyChatScore Report</title>
+<style>
+body{
+margin:0;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#111;
+color:white;
+font-family:sans-serif;
+flex-direction:column;
+}
+img{
+max-width:95%;
+border-radius:12px;
+margin-top:10px;
+}
+p{
+margin-top:20px;
+}
+</style>
+</head>
+<body>
+<p>Long press the image and tap <b>Save Image</b></p>
+<img src="${dataUrl}" />
+</body>
+</html>
+`);
+}
 
 }else{
 
-/* Android + Desktop download */
+/* Android + Desktop */
 
 const link=document.createElement("a");
 link.href=dataUrl;
