@@ -360,9 +360,7 @@ setLoading(false);
 
 /* ---------------- DOWNLOAD REPORT ---------------- */
 
-/* ---------------- DOWNLOAD REPORT ---------------- */
-
-function downloadReport(){
+async function downloadReport(){
 
 if(!reportRef.current)return;
 
@@ -370,44 +368,46 @@ const buttons=document.querySelector(".actionButtons") as HTMLElement;
 
 if(buttons)buttons.style.display="none";
 
-html2canvas(reportRef.current).then(canvas=>{
+const canvas = await html2canvas(reportRef.current);
 
-const image=canvas.toDataURL("image/png");
+const blob = await new Promise(resolve =>
+canvas.toBlob(resolve,"image/png")
+);
 
-/* detect mobile */
+const url = URL.createObjectURL(blob);
 
-const isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+/* detect iOS only */
 
-if(isMobile){
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-/* open image in new tab for mobile */
+if(isIOS){
 
-const newTab=window.open();
-if(newTab){
-newTab.document.write(`<img src="${image}" style="width:100%">`);
-}
+/* iPhone workaround */
+
+window.open(url,"_blank");
 
 }else{
 
-/* normal download for desktop */
+/* Android + Desktop download */
 
 const link=document.createElement("a");
 
+link.href=url;
+
 link.download="mychatscore.png";
 
-link.href=image;
-
 document.body.appendChild(link);
+
 link.click();
+
 document.body.removeChild(link);
 
 }
 
 if(buttons)buttons.style.display="flex";
 
-});
-
 }
+
 
 /* ---------------- COPY ---------------- */
 
