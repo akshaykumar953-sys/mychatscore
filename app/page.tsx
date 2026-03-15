@@ -390,7 +390,7 @@ modal.style.top="0";
 modal.style.left="0";
 modal.style.width="100%";
 modal.style.height="100%";
-modal.style.background="rgba(0,0,0,0.85)";
+modal.style.background="rgba(0,0,0,0.9)";
 modal.style.zIndex="9999";
 modal.style.display="flex";
 modal.style.alignItems="center";
@@ -405,6 +405,10 @@ Long press image → Save Image
 
 <img src="${dataUrl}" style="max-width:95%;border-radius:12px"/>
 
+<div style="color:#ccc;margin-top:10px;font-size:14px">
+Returning to results in <span id="countdown">8</span>s
+</div>
+
 <button style="
 margin-top:15px;
 padding:10px 18px;
@@ -413,24 +417,54 @@ background:#22c55e;
 color:white;
 border-radius:8px;
 font-size:16px;
-"
->Close</button>
+cursor:pointer;
+">
+Close
+</button>
 
 `;
 
+document.body.appendChild(modal);
+
+/* manual close */
+
 modal.querySelector("button")!.onclick=()=>{
+if(document.body.contains(modal)){
 document.body.removeChild(modal);
+}
 };
 
-document.body.appendChild(modal);
+/* countdown auto close */
+
+let seconds=8;
+
+const timer=setInterval(()=>{
+
+seconds--;
+
+const el=document.getElementById("countdown");
+if(el) el.textContent=String(seconds);
+
+if(seconds<=0){
+
+clearInterval(timer);
+
+if(document.body.contains(modal)){
+document.body.removeChild(modal);
+}
+
+}
+
+},1000);
 
 }else{
 
-/* android + desktop */
+/* Android + Desktop download */
 
 const link=document.createElement("a");
 link.href=dataUrl;
 link.download="mychatscore.png";
+
 document.body.appendChild(link);
 link.click();
 document.body.removeChild(link);
