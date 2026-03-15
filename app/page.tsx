@@ -370,8 +370,8 @@ if(buttons)buttons.style.display="none";
 
 const canvas = await html2canvas(reportRef.current);
 
-const blob = await new Promise(resolve =>
-canvas.toBlob(resolve,"image/png")
+const blob: Blob = await new Promise((resolve)=>
+canvas.toBlob((b)=>resolve(b as Blob),"image/png")
 );
 
 const url = URL.createObjectURL(blob);
@@ -382,13 +382,9 @@ const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 if(isIOS){
 
-/* iPhone workaround */
-
 window.open(url,"_blank");
 
 }else{
-
-/* Android + Desktop download */
 
 const link=document.createElement("a");
 
@@ -407,7 +403,6 @@ document.body.removeChild(link);
 if(buttons)buttons.style.display="flex";
 
 }
-
 
 /* ---------------- COPY ---------------- */
 
