@@ -1,7 +1,6 @@
 
-import LRU from "lru-cache";
-
-const rateLimit = new LRU({
+import { LRUCache } from "lru-cache";
+const rateLimit = new LRUCache({
 max: 500,
 ttl: 1000 * 60
 });
