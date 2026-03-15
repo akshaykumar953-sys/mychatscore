@@ -333,9 +333,8 @@ canvas.height=height;
 
 ctx?.drawImage(img,0,0,width,height);
 
-const {data}=await Tesseract.recognize(canvas,"eng",{
-tessedit_pageseg_mode:6
-});
+
+const { data } = await Tesseract.recognize(canvas, "eng");
 
 setChatText(data.text);
 
