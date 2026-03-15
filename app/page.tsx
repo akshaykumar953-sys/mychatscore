@@ -367,6 +367,23 @@ if(!reportRef.current) return;
 const buttons=document.querySelector(".actionButtons") as HTMLElement;
 if(buttons) buttons.style.display="none";
 
+/* detect iOS */
+
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+/* OPEN TAB FIRST (important for Safari) */
+
+let newTab:Window|null = null;
+
+if(isIOS){
+newTab = window.open("", "_blank");
+if(newTab){
+newTab.document.write("<p style='font-family:sans-serif;text-align:center;margin-top:40px'>Preparing image...</p>");
+}
+}
+
+/* create canvas */
+
 const canvas = await html2canvas(reportRef.current,{
 scale:3,
 useCORS:true,
@@ -375,51 +392,22 @@ backgroundColor:"#ffffff"
 
 const dataUrl = canvas.toDataURL("image/png");
 
-const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-
 if(isIOS){
 
-/* iPhone safe preview window */
+/* insert image into already opened tab */
 
-const w = window.open("");
-
-if(w){
-w.document.write(`
-<html>
-<head>
-<title>MyChatScore Report</title>
-<style>
-body{
-margin:0;
-display:flex;
-align-items:center;
-justify-content:center;
-background:#111;
-color:white;
-font-family:sans-serif;
-flex-direction:column;
-}
-img{
-max-width:95%;
-border-radius:12px;
-margin-top:10px;
-}
-p{
-margin-top:20px;
-}
-</style>
-</head>
-<body>
+if(newTab){
+newTab.document.body.innerHTML = `
+<div style="text-align:center;font-family:sans-serif">
 <p>Long press the image and tap <b>Save Image</b></p>
-<img src="${dataUrl}" />
-</body>
-</html>
-`);
+<img src="${dataUrl}" style="width:100%;max-width:600px"/>
+</div>
+`;
 }
 
 }else{
 
-/* Android + Desktop */
+/* Android + Desktop download */
 
 const link=document.createElement("a");
 link.href=dataUrl;
