@@ -385,6 +385,12 @@ async function downloadReport(){
 
 if(!reportRef.current) return;
 
+const buttons = document.querySelector(".actionButtons") as HTMLElement;
+
+/* hide buttons */
+
+if(buttons) buttons.style.display="none";
+
 const canvas = await html2canvas(reportRef.current,{
 scale:3,
 useCORS:true,
@@ -392,6 +398,10 @@ backgroundColor:"#ffffff"
 });
 
 const dataUrl = canvas.toDataURL("image/png");
+
+/* restore buttons */
+
+if(buttons) buttons.style.display="flex";
 
 const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -409,57 +419,10 @@ modal.style.zIndex="9999";
 modal.style.display="flex";
 modal.style.alignItems="center";
 modal.style.justifyContent="center";
-modal.style.flexDirection="column";
 
-modal.innerHTML=`
-
-<div style="color:white;margin-bottom:10px;font-family:sans-serif">
-Long press image → Save Image
-</div>
-
-<img src="${dataUrl}" style="max-width:90%;border-radius:12px"/>
-
-<div style="color:#ccc;margin-top:10px;font-size:14px">
-Returning in <span id="countdown">8</span>s
-</div>
-
-<button style="
-margin-top:15px;
-padding:10px 18px;
-border:none;
-background:#22c55e;
-color:white;
-border-radius:8px;
-font-size:16px;
-">
-Close
-</button>
-
-`;
+modal.innerHTML=`<img src="${dataUrl}" style="max-width:90%;border-radius:12px"/>`;
 
 document.body.appendChild(modal);
-
-modal.querySelector("button")!.onclick=()=>{
-document.body.removeChild(modal);
-};
-
-let seconds=8;
-
-const timer=setInterval(()=>{
-
-seconds--;
-
-const el=document.getElementById("countdown");
-if(el) el.textContent=String(seconds);
-
-if(seconds<=0){
-clearInterval(timer);
-if(document.body.contains(modal)){
-document.body.removeChild(modal);
-}
-}
-
-},1000);
 
 }else{
 
@@ -491,11 +454,16 @@ async function shareReport(){
 
 if(!reportRef.current) return;
 
+const buttons = document.querySelector(".actionButtons") as HTMLElement;
+
+if(buttons) buttons.style.display="none";
+
 const canvas = await html2canvas(reportRef.current,{
 scale:3,
-useCORS:true,
 backgroundColor:"#ffffff"
 });
+
+if(buttons) buttons.style.display="flex";
 
 canvas.toBlob(async(blob)=>{
 
@@ -505,11 +473,19 @@ const file = new File([blob],"mychatscore.png",{type:"image/png"});
 
 if(navigator.share){
 
+try{
+
 await navigator.share({
-title:"MyChatScore Result",
-text:"Check my chat chemistry score!",
+title:"My Chat Chemistry Score",
+text:"Check this chat chemistry result!",
 files:[file]
 });
+
+}catch(err){
+
+console.log("Share cancelled");
+
+}
 
 }else{
 
