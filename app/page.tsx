@@ -150,11 +150,12 @@ return match?match[1]:"—";
 
 }
 
+
 function parseVerdict(){
 
-const match=result.match(/Verdict:(.*)/s);
+const match=result.match(/Verdict:([\s\S]*)/);
 
-return match?match[1].trim():"";
+return match ? match[1].trim() : "";
 
 }
 
