@@ -368,34 +368,37 @@ const buttons=document.querySelector(".actionButtons") as HTMLElement;
 
 if(buttons)buttons.style.display="none";
 
-const canvas = await html2canvas(reportRef.current);
+const canvas = await html2canvas(reportRef.current,{
+scale:3,
+useCORS:true,
+backgroundColor:"#ffffff"
+});
 
-const blob: Blob = await new Promise((resolve)=>
+const blob:Blob = await new Promise((resolve)=>
 canvas.toBlob((b)=>resolve(b as Blob),"image/png")
 );
 
 const url = URL.createObjectURL(blob);
 
-/* detect iOS only */
-
 const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 if(isIOS){
 
-window.open(url,"_blank");
+const newTab = window.open();
+
+if(newTab){
+newTab.document.write(`<img src="${url}" style="width:100%">`);
+}
 
 }else{
 
 const link=document.createElement("a");
 
 link.href=url;
-
 link.download="mychatscore.png";
 
 document.body.appendChild(link);
-
 link.click();
-
 document.body.removeChild(link);
 
 }
