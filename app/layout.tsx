@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "MyChatScore — AI Chat Analysis",
   description:
     "Analyze conversations instantly using AI. Detect interest level, flirting signals, ghosting risk, and relationship dynamics.",
+  verification: {
+    google: "wcmzjGH4SKbgivR2EOofD_SAay9xDnsYkq5ZkxjWxaU",
+  },
 };
 
 export default function RootLayout({
