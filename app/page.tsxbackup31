@@ -212,18 +212,6 @@ alert("Paste chat first");
 return;
 }
 
-/* text length limit */
-
-const MAX_CHAT_LENGTH = 3000;
-
-if(chatText.length > MAX_CHAT_LENGTH){
-
-alert("Chat too long. Please paste a shorter conversation.");
-
-return;
-
-}
-
 setLoading(true);
 setResult("");
 
@@ -269,20 +257,8 @@ setResult("");
 
 async function handleImageUpload(e:any){
 
-const file = e.target.files[0];
+const file=e.target.files?.[0];
 if(!file) return;
-
-/* file size limit */
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-
-if(file.size > MAX_FILE_SIZE){
-
-alert("Screenshot too large. Maximum size is 5MB.");
-
-return;
-
-}
 
 try{
 
@@ -304,7 +280,7 @@ img.onload=async()=>{
 const canvas=document.createElement("canvas");
 const ctx=canvas.getContext("2d");
 
-const MAX_WIDTH=1500;
+const MAX_WIDTH=1200;
 
 let width=img.width;
 let height=img.height;
@@ -525,8 +501,7 @@ onChange={handleImageUpload}
 
 <textarea
 rows={6}
-maxLength={3000}
-placeholder="Paste your chat conversation (max ~300 messages)"
+placeholder="Paste your chat conversation..."
 value={chatText}
 onChange={(e)=>setChatText(e.target.value)}
 />
