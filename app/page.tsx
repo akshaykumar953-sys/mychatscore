@@ -364,9 +364,6 @@ async function downloadReport(){
 
 if(!reportRef.current) return;
 
-const buttons=document.querySelector(".actionButtons") as HTMLElement;
-if(buttons) buttons.style.display="none";
-
 const canvas = await html2canvas(reportRef.current,{
 scale:3,
 useCORS:true,
@@ -375,13 +372,9 @@ backgroundColor:"#ffffff"
 
 const dataUrl = canvas.toDataURL("image/png");
 
-/* detect iphone */
-
 const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 if(isIOS){
-
-/* create preview modal */
 
 const modal=document.createElement("div");
 
@@ -403,10 +396,10 @@ modal.innerHTML=`
 Long press image → Save Image
 </div>
 
-<img src="${dataUrl}" style="max-width:95%;border-radius:12px"/>
+<img src="${dataUrl}" style="max-width:90%;border-radius:12px"/>
 
 <div style="color:#ccc;margin-top:10px;font-size:14px">
-Returning to results in <span id="countdown">8</span>s
+Returning in <span id="countdown">8</span>s
 </div>
 
 <button style="
@@ -417,7 +410,6 @@ background:#22c55e;
 color:white;
 border-radius:8px;
 font-size:16px;
-cursor:pointer;
 ">
 Close
 </button>
@@ -426,15 +418,9 @@ Close
 
 document.body.appendChild(modal);
 
-/* manual close */
-
 modal.querySelector("button")!.onclick=()=>{
-if(document.body.contains(modal)){
 document.body.removeChild(modal);
-}
 };
-
-/* countdown auto close */
 
 let seconds=8;
 
@@ -446,32 +432,28 @@ const el=document.getElementById("countdown");
 if(el) el.textContent=String(seconds);
 
 if(seconds<=0){
-
 clearInterval(timer);
-
 if(document.body.contains(modal)){
 document.body.removeChild(modal);
 }
-
 }
 
 },1000);
 
 }else{
 
-/* Android + Desktop download */
-
 const link=document.createElement("a");
+
 link.href=dataUrl;
 link.download="mychatscore.png";
 
 document.body.appendChild(link);
+
 link.click();
+
 document.body.removeChild(link);
 
 }
-
-if(buttons) buttons.style.display="flex";
 
 }
 
@@ -484,20 +466,37 @@ alert("Copied!");
 
 /* ---------------- SHARE ---------------- */
 
-function shareReport(){
+async function shareReport(){
+
+if(!reportRef.current) return;
+
+const canvas = await html2canvas(reportRef.current,{
+scale:3,
+useCORS:true,
+backgroundColor:"#ffffff"
+});
+
+canvas.toBlob(async(blob)=>{
+
+if(!blob) return;
+
+const file = new File([blob],"mychatscore.png",{type:"image/png"});
 
 if(navigator.share){
 
-navigator.share({
+await navigator.share({
 title:"MyChatScore Result",
-text:result
+text:"Check my chat chemistry score!",
+files:[file]
 });
 
 }else{
 
-copyReport();
+alert("Sharing not supported on this device");
 
 }
+
+});
 
 }
 
@@ -663,7 +662,7 @@ onChange={(e)=>setChatText(e.target.value)}
 
 <section className="resultSection">
 
-<div ref={reportRef} className="resultCard">
+<div ref={reportRef} className="resultCard exportCard">
 
 <h2>MyChatScore Report</h2>
 <div className="chatScore">
