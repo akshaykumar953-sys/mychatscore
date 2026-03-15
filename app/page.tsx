@@ -267,10 +267,10 @@ setLoading(false);
 
 function loadDemoChat(){
 
-setChatText(`Akshay: Hey what are you doing tonight?
-Arvind: Nothing much
-Akshay: Want to grab coffee tomorrow?
-Arvind: Sure sounds good :)`);
+setChatText(`Tom: Hey what are you doing tonight?
+Jerry: Nothing much
+Tom: Want to grab coffee tomorrow?
+Jerry: Sure sounds good :)`);
 
 }
 
