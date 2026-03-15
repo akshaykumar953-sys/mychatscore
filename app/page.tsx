@@ -362,21 +362,24 @@ setLoading(false);
 
 async function downloadReport(){
 
-alert("Step 1: Download button clicked");
-
-try{
-
-if(!reportRef.current){
-alert("Step 2: reportRef not found");
-return;
-}
-
-alert("Step 3: reportRef found");
+if(!reportRef.current) return;
 
 const buttons=document.querySelector(".actionButtons") as HTMLElement;
 if(buttons) buttons.style.display="none";
 
-alert("Step 4: Starting html2canvas");
+/* detect iPhone */
+
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+/* OPEN TAB IMMEDIATELY (Safari requirement) */
+
+let newTab:Window|null=null;
+
+if(isIOS){
+newTab = window.open("", "_blank");
+}
+
+/* now run html2canvas */
 
 const canvas = await html2canvas(reportRef.current,{
 scale:3,
@@ -384,47 +387,29 @@ useCORS:true,
 backgroundColor:"#ffffff"
 });
 
-alert("Step 5: Canvas created successfully");
-
 const dataUrl = canvas.toDataURL("image/png");
-
-alert("Step 6: Image converted to DataURL");
-
-const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-alert("Step 7: Device check → " + (isIOS ? "iPhone detected" : "Not iPhone"));
 
 if(isIOS){
 
-alert("Step 8: Opening preview window");
+if(newTab){
 
-const w = window.open("", "_blank");
-
-if(w){
-
-alert("Step 9: Writing image to new tab");
-
-w.document.write(`
+newTab.document.write(`
 <html>
 <head>
 <title>MyChatScore Report</title>
 </head>
 <body style="margin:0;text-align:center;font-family:sans-serif">
-<p>Long press the image and tap <b>Save Image</b></p>
-<img src="${dataUrl}" style="width:100%;max-width:600px"/>
+<p style="padding:20px">Long press image → Save Image</p>
+<img src="${dataUrl}" style="width:100%;max-width:700px"/>
 </body>
 </html>
 `);
-
-}else{
-
-alert("Step 9 FAILED: window.open blocked");
 
 }
 
 }else{
 
-alert("Step 8: Android/Desktop download path");
+/* Android + Desktop */
 
 const link=document.createElement("a");
 
@@ -432,28 +417,15 @@ link.href=dataUrl;
 link.download="mychatscore.png";
 
 document.body.appendChild(link);
-
 link.click();
-
 document.body.removeChild(link);
-
-alert("Step 9: Download triggered");
 
 }
 
 if(buttons) buttons.style.display="flex";
 
-alert("Step 10: Process finished");
-
-}catch(err){
-
-alert("ERROR: " + err);
-
-console.error(err);
-
 }
 
-}
 /* ---------------- COPY ---------------- */
 
 function copyReport(){
