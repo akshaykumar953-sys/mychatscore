@@ -1109,3 +1109,23 @@ padding:20px;
 }
 
 }
+
+.reportFooter{
+
+margin-top:20px;
+
+text-align:center;
+
+font-size:14px;
+
+color:#888;
+
+}
+
+.reportFooter strong{
+
+color:#22c55e;
+
+font-weight:600;
+
+}
