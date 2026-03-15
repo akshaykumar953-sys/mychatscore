@@ -379,21 +379,12 @@ const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 if(isIOS){
 
-/* Safari safe method */
-
-const newTab = window.open();
-if(newTab){
-newTab.document.body.innerHTML = `
-<div style="text-align:center;font-family:sans-serif">
-<p>Long press the image and tap "Save Image"</p>
-<img src="${dataUrl}" style="width:100%;max-width:600px"/>
-</div>
-`;
-}
+/* iPhone Safari workaround */
+window.location.href = dataUrl;
 
 }else{
 
-/* Android + Desktop */
+/* Android + Desktop download */
 
 const link=document.createElement("a");
 link.href=dataUrl;
