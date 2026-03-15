@@ -267,10 +267,13 @@ setLoading(false);
 
 function loadDemoChat(){
 
-setChatText(`Tom: Hey what are you doing tonight?
-Jerry: Nothing much
-Tom: Want to grab coffee tomorrow?
-Jerry: Sure sounds good :)`);
+setChatText(`Alex: Hey, how was your day?
+Sam: Pretty good actually! Busy though.
+Alex: Same here 😅
+Sam: What are you doing this weekend?
+Alex: Nothing planned yet, maybe relaxing.
+Sam: We should grab coffee sometime 🙂
+Alex: I'd like that!`);
 
 }
 
