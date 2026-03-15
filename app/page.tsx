@@ -362,11 +362,10 @@ setLoading(false);
 
 async function downloadReport(){
 
-if(!reportRef.current)return;
+if(!reportRef.current) return;
 
 const buttons=document.querySelector(".actionButtons") as HTMLElement;
-
-if(buttons)buttons.style.display="none";
+if(buttons) buttons.style.display="none";
 
 const canvas = await html2canvas(reportRef.current,{
 scale:3,
@@ -374,36 +373,38 @@ useCORS:true,
 backgroundColor:"#ffffff"
 });
 
-const blob:Blob = await new Promise((resolve)=>
-canvas.toBlob((b)=>resolve(b as Blob),"image/png")
-);
-
-const url = URL.createObjectURL(blob);
+const dataUrl = canvas.toDataURL("image/png");
 
 const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 if(isIOS){
 
-const newTab = window.open();
+/* Safari safe method */
 
+const newTab = window.open();
 if(newTab){
-newTab.document.write(`<img src="${url}" style="width:100%">`);
+newTab.document.body.innerHTML = `
+<div style="text-align:center;font-family:sans-serif">
+<p>Long press the image and tap "Save Image"</p>
+<img src="${dataUrl}" style="width:100%;max-width:600px"/>
+</div>
+`;
 }
 
 }else{
 
+/* Android + Desktop */
+
 const link=document.createElement("a");
-
-link.href=url;
+link.href=dataUrl;
 link.download="mychatscore.png";
-
 document.body.appendChild(link);
 link.click();
 document.body.removeChild(link);
 
 }
 
-if(buttons)buttons.style.display="flex";
+if(buttons) buttons.style.display="flex";
 
 }
 
