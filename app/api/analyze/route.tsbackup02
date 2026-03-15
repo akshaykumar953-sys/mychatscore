@@ -1,0 +1,124 @@
+import OpenAI from "openai";
+
+export async function POST(req: Request) {
+
+  try {
+
+    const body = await req.json();
+    const chatText = body.text;
+
+    if (!process.env.OPENAI_API_KEY) {
+      return Response.json(
+        { error: "OpenAI API key missing" },
+        { status: 500 }
+      );
+    }
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      temperature: 0.3,
+      messages: [
+
+        {
+          role: "system",
+          content: `
+You are an expert AI conversation analyst.
+
+The USER pasted a conversation.
+
+Assume:
+"You" = the user who pasted the chat
+"Them" = the other person in the conversation.
+
+Analyze behavioral signals such as:
+
+• message enthusiasm
+• emoji usage
+• who asks questions
+• who keeps the conversation going
+• message length
+• friendliness
+• curiosity
+• engagement level
+
+Do NOT guess randomly. Base scores on observable chat behavior.
+`
+        },
+
+        {
+          role: "user",
+          content: `
+Analyze this conversation and return a structured report.
+
+Evaluate:
+
+1. Interest Score (0–100)
+How interested THEM appear in YOU.
+
+2. Flirting Level
+Low / Medium / High
+
+3. Ghosting Risk
+Low / Medium / High
+
+4. Effort Balance
+Estimate conversational effort.
+
+Return:
+You: X%
+Them: X%
+
+5. Conversation Energy
+Low / Medium / High
+
+6. Curiosity Level
+Low / Medium / High
+
+7. Verdict
+Write a short human explanation.
+
+Return EXACTLY in this format:
+
+Interest Score: <number>
+
+Flirting Level: <Low / Medium / High>
+
+Ghosting Risk: <Low / Medium / High>
+
+Effort Balance:
+You: <percentage>
+Them: <percentage>
+
+Conversation Energy: <Low / Medium / High>
+
+Curiosity Level: <Low / Medium / High>
+
+Verdict: <short explanation>
+
+
+Conversation:
+${chatText}
+`
+        }
+
+      ]
+    });
+
+    return Response.json({
+      result: completion.choices[0].message.content
+    });
+
+  } catch (error: any) {
+
+    console.error("API ERROR:", error);
+
+    return Response.json(
+      { error: error.message || "Unknown server error" },
+      { status: 500 }
+    );
+  }
+}
