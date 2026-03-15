@@ -966,3 +966,119 @@ margin-top:30px;
 
 }
 
+/* ================= FEEDBACK WIDGET ================= */
+
+/* AVI FEEDBACK WIDGET */
+
+.feedbackWidget{
+position:fixed;
+bottom:25px;
+right:25px;
+z-index:999;
+}
+
+.feedbackButton{
+background:#22c55e;
+border:none;
+width:60px;
+height:60px;
+border-radius:50%;
+font-size:22px;
+color:white;
+cursor:pointer;
+box-shadow:0 10px 25px rgba(0,0,0,.2);
+}
+
+.feedbackPanel{
+position:absolute;
+bottom:70px;
+right:0;
+width:260px;
+background:white;
+border-radius:12px;
+padding:16px;
+box-shadow:0 20px 40px rgba(0,0,0,.2);
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.feedbackPanel input,
+.feedbackPanel textarea{
+width:100%;
+padding:8px;
+border-radius:8px;
+border:1px solid #e5e7eb;
+font-size:13px;
+}
+
+.feedbackPanel textarea{
+min-height:70px;
+resize:none;
+}
+
+.feedbackPanel button{
+background:#22c55e;
+color:white;
+border:none;
+padding:8px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.aviText{
+font-size:12px;
+color:#64748b;
+margin-top:-6px;
+}
+
+/* AVI GREETING BUBBLE */
+
+.aviGreeting{
+position:fixed;
+bottom:95px;
+right:25px;
+background:white;
+padding:12px 16px;
+border-radius:14px;
+box-shadow:0 10px 30px rgba(0,0,0,.15);
+font-size:13px;
+max-width:220px;
+line-height:1.4;
+animation:aviFadeIn .6s ease;
+z-index:998;
+}
+
+/* small arrow */
+
+.aviGreeting::after{
+content:"";
+position:absolute;
+bottom:-8px;
+right:20px;
+width:0;
+height:0;
+border-left:8px solid transparent;
+border-right:8px solid transparent;
+border-top:8px solid white;
+}
+
+/* animation */
+
+@keyframes aviFadeIn{
+from{
+opacity:0;
+transform:translateY(10px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+.charCounter{
+font-size:11px;
+color:#64748b;
+text-align:right;
+margin-top:-6px;
+}

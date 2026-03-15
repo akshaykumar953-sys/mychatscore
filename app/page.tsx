@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import html2canvas from "html2canvas";
 import Tesseract from "tesseract.js";
 
@@ -50,8 +50,21 @@ const [loading,setLoading]=useState(false);
 const [chatOpen,setChatOpen]=useState(false);
 const [userEmail,setUserEmail]=useState("");
 const [message,setMessage]=useState("");
-
+const [showGreeting,setShowGreeting] = useState(true);
 const reportRef=useRef<HTMLDivElement>(null);
+
+
+useEffect(()=>{
+
+const timer = setTimeout(()=>{
+
+setShowGreeting(false);
+
+},10000);
+
+return ()=>clearTimeout(timer);
+
+},[]);
 
 /* ---------------- NAME DETECTION ---------------- */
 
@@ -728,6 +741,63 @@ AI insights are generated automatically and may not always be accurate.
 </div>
 
 )}
+
+{/* AVI FEEDBACK WIDGET */}
+
+<div className="feedbackWidget">
+
+{/* AVI GREETING */}
+
+{!chatOpen && showGreeting && (
+<div className="aviGreeting">
+👋 Hi, I'm Avi. Need help or want to share feedback?
+</div>
+)}
+
+<button
+className="feedbackButton"
+onClick={()=>setChatOpen(!chatOpen)}
+>
+💬 Avi
+</button>
+
+{chatOpen && (
+
+<div className="feedbackPanel">
+
+<h4>👋 Avi Feedback</h4>
+
+<p className="aviText">
+Need help or want to report something?
+</p>
+
+<input
+type="email"
+placeholder="your@email.com"
+value={userEmail}
+onChange={(e)=>setUserEmail(e.target.value)}
+/>
+
+<textarea
+placeholder="Your message..."
+maxLength={500}
+value={message}
+onChange={(e)=>setMessage(e.target.value)}
+/>
+
+<div className="charCounter">
+{message.length}/500
+</div>
+
+<button onClick={sendFeedback}>
+Send
+</button>
+
+</div>
+
+)}
+
+</div>
 
 </main>
 

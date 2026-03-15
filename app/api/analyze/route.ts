@@ -72,31 +72,22 @@ const completion = await openai.chat.completions.create({
 model: "gpt-4o-mini",
 
 temperature: 0,
+max_tokens:200,
 
 messages:[
 
 {
+
 role:"system",
 content:`
-You are an expert AI conversation analyst.
+You analyze chat conversations and return relationship insights.
 
-First detect the names of the two people in the conversation.
+Detect two participant names if present (e.g., "Akshay: message").
+If names are unclear use "User" and "Other Person".
 
-If names appear like:
-
-Akshay: message
-Sarah: message
-
-Then assume:
-Akshay = user
-Sarah = other person.
-
-If names are unclear, use:
-User
-Other Person.
-
-Use the detected names inside the explanation.
+Always mention the detected names inside the explanation.
 `
+
 },
 
 {
