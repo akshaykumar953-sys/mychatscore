@@ -367,20 +367,6 @@ if(!reportRef.current) return;
 const buttons=document.querySelector(".actionButtons") as HTMLElement;
 if(buttons) buttons.style.display="none";
 
-/* detect iPhone */
-
-const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-/* OPEN TAB IMMEDIATELY (Safari requirement) */
-
-let newTab:Window|null=null;
-
-if(isIOS){
-newTab = window.open("", "_blank");
-}
-
-/* now run html2canvas */
-
 const canvas = await html2canvas(reportRef.current,{
 scale:3,
 useCORS:true,
@@ -389,33 +375,62 @@ backgroundColor:"#ffffff"
 
 const dataUrl = canvas.toDataURL("image/png");
 
+/* detect iphone */
+
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 if(isIOS){
 
-if(newTab){
+/* create preview modal */
 
-newTab.document.write(`
-<html>
-<head>
-<title>MyChatScore Report</title>
-</head>
-<body style="margin:0;text-align:center;font-family:sans-serif">
-<p style="padding:20px">Long press image → Save Image</p>
-<img src="${dataUrl}" style="width:100%;max-width:700px"/>
-</body>
-</html>
-`);
+const modal=document.createElement("div");
 
-}
+modal.style.position="fixed";
+modal.style.top="0";
+modal.style.left="0";
+modal.style.width="100%";
+modal.style.height="100%";
+modal.style.background="rgba(0,0,0,0.85)";
+modal.style.zIndex="9999";
+modal.style.display="flex";
+modal.style.alignItems="center";
+modal.style.justifyContent="center";
+modal.style.flexDirection="column";
+
+modal.innerHTML=`
+
+<div style="color:white;margin-bottom:10px;font-family:sans-serif">
+Long press image → Save Image
+</div>
+
+<img src="${dataUrl}" style="max-width:95%;border-radius:12px"/>
+
+<button style="
+margin-top:15px;
+padding:10px 18px;
+border:none;
+background:#22c55e;
+color:white;
+border-radius:8px;
+font-size:16px;
+"
+>Close</button>
+
+`;
+
+modal.querySelector("button")!.onclick=()=>{
+document.body.removeChild(modal);
+};
+
+document.body.appendChild(modal);
 
 }else{
 
-/* Android + Desktop */
+/* android + desktop */
 
 const link=document.createElement("a");
-
 link.href=dataUrl;
 link.download="mychatscore.png";
-
 document.body.appendChild(link);
 link.click();
 document.body.removeChild(link);
