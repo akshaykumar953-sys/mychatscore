@@ -1,7 +1,31 @@
+
+import LRU from "lru-cache";
+
+const rateLimit = new LRU({
+max: 500,
+ttl: 1000 * 60
+});
+
 import OpenAI from "openai";
 const requestMap = new Map();
 
 export async function POST(req: Request) {
+
+const ip =
+req.headers.get("x-forwarded-for") ||
+req.headers.get("x-real-ip") ||
+"unknown";
+
+const count = rateLimit.get(ip) || 0;
+
+if (count >= 15) {
+return Response.json(
+{ error: "Too many requests. Please wait." },
+{ status: 429 }
+);
+}
+
+rateLimit.set(ip, count + 1);
 
 try{
 

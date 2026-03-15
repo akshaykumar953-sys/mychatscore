@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "html2canvas": "^1.4.1",
+    "lru-cache": "^11.2.7",
     "next": "16.1.6",
     "nodemailer": "^8.0.2",
     "openai": "^6.29.0",

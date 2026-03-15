@@ -412,18 +412,18 @@ copyReport();
 async function sendFeedback(){
 
 if(!message.trim()){
-alert("Write message");
+alert("Please enter a message");
 return;
 }
 
 if(!userEmail.trim()){
-alert("Enter email");
+alert("Please enter your email");
 return;
 }
 
 try{
 
-await fetch("/api/feedback",{
+const res = await fetch("/api/feedback",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
@@ -432,15 +432,22 @@ message
 })
 });
 
+const data = await res.json();
+
+if(!res.ok){
+alert(data.error || "Failed to send feedback");
+return;
+}
+
 alert("Feedback sent");
 
 setUserEmail("");
 setMessage("");
 setChatOpen(false);
 
-}catch{
+}catch(error){
 
-alert("Feedback failed");
+alert("Server error");
 
 }
 
