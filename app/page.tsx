@@ -387,7 +387,7 @@ if(!reportRef.current) return;
 
 const buttons = document.querySelector(".actionButtons") as HTMLElement;
 
-/* hide buttons */
+/* hide buttons before capture */
 
 if(buttons) buttons.style.display="none";
 
@@ -419,10 +419,44 @@ modal.style.zIndex="9999";
 modal.style.display="flex";
 modal.style.alignItems="center";
 modal.style.justifyContent="center";
+modal.style.flexDirection="column";
 
-modal.innerHTML=`<img src="${dataUrl}" style="max-width:90%;border-radius:12px"/>`;
+modal.innerHTML=`
+
+<div style="color:white;margin-bottom:10px">
+Long press image → Save Image
+</div>
+
+<img src="${dataUrl}" style="max-width:90%;border-radius:12px"/>
+
+<div style="color:#ccc;margin-top:10px">
+Returning in <span id="countdown">8</span>s
+</div>
+
+`;
 
 document.body.appendChild(modal);
+
+let seconds=8;
+
+const timer=setInterval(()=>{
+
+seconds--;
+
+const el=document.getElementById("countdown");
+if(el) el.textContent=String(seconds);
+
+if(seconds<=0){
+
+clearInterval(timer);
+
+if(document.body.contains(modal)){
+document.body.removeChild(modal);
+}
+
+}
+
+},1000);
 
 }else{
 
