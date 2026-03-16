@@ -933,6 +933,10 @@ AI insights are generated automatically and may not always be accurate.
 
 </p>
 
+<div className="copyright">
+© 2026 MyChatScore. All rights reserved.
+</div>
+
 </footer>
 
 {/* AI LOADER */}
