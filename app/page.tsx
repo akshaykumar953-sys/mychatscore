@@ -497,7 +497,52 @@ scale:3,
 backgroundColor:"#ffffff"
 });
 
+const dataUrl = canvas.toDataURL("image/png");
+
 if(buttons) buttons.style.display="flex";
+
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+/* iPhone fallback */
+
+if(isIOS){
+
+const modal=document.createElement("div");
+
+modal.style.position="fixed";
+modal.style.top="0";
+modal.style.left="0";
+modal.style.width="100%";
+modal.style.height="100%";
+modal.style.background="rgba(0,0,0,0.9)";
+modal.style.zIndex="9999";
+modal.style.display="flex";
+modal.style.alignItems="center";
+modal.style.justifyContent="center";
+modal.style.flexDirection="column";
+
+modal.innerHTML=`
+
+<div style="color:white;margin-bottom:10px">
+Long press image → Share or Save
+</div>
+
+<img src="${dataUrl}" style="max-width:90%;border-radius:12px"/>
+
+`;
+
+document.body.appendChild(modal);
+
+setTimeout(()=>{
+if(document.body.contains(modal)){
+document.body.removeChild(modal);
+}
+},8000);
+
+return;
+}
+
+/* Android / Desktop share */
 
 canvas.toBlob(async(blob)=>{
 
@@ -511,19 +556,13 @@ try{
 
 await navigator.share({
 title:"My Chat Chemistry Score",
-text:"Check this chat chemistry result!",
+text:"Check my chat chemistry score!",
 files:[file]
 });
 
 }catch(err){
-
 console.log("Share cancelled");
-
 }
-
-}else{
-
-alert("Sharing not supported on this device");
 
 }
 
