@@ -5,12 +5,14 @@ import html2canvas from "html2canvas";
 import Tesseract from "tesseract.js";
 
 import {
-BarChart,
-Bar,
-XAxis,
-Tooltip,
 ResponsiveContainer,
-LineChart,
+ComposedChart,
+CartesianGrid,
+XAxis,
+YAxis,
+Tooltip,
+Legend,
+Bar,
 Line
 } from "recharts";
 
@@ -199,10 +201,29 @@ const balanceData = calculateEffort(chatText,you,them);
 
 const score = parseInt(interest) || 50;
 
-const timelineData=[
-{step:"Start",interest:Math.max(30,score-20)},
-{step:"Mid",interest:Math.max(40,score-5)},
-{step:"End",interest:score}
+const timelineData = [
+
+{
+stage:"Start",
+interest:50,
+alexEffort:20,
+samEffort:15
+},
+
+{
+stage:"Mid",
+interest:65,
+alexEffort:35,
+samEffort:30
+},
+
+{
+stage:"End",
+interest:75,
+alexEffort:55,
+samEffort:43
+}
+
 ];
 
 /* ---------------- REPLY PROBABILITY ---------------- */
@@ -250,6 +271,17 @@ body:JSON.stringify({text:chatText})
 });
 
 const data=await res.json();
+
+/* 🚨 HANDLE ERROR PROPERLY */
+if (!res.ok) {
+  alert(data.error || "Invalid chat. Please try again.");
+  
+  /* CLEAR OLD RESULTS (VERY IMPORTANT) */
+  setResult("");
+  setTimelineData([]);
+  
+  return;
+}
 
 setResult(data.result || "Analysis failed");
 
@@ -364,25 +396,11 @@ async function downloadReport(){
 
 if(!reportRef.current) return;
 
-const buttons=document.querySelector(".actionButtons") as HTMLElement;
+const buttons = document.querySelector(".actionButtons") as HTMLElement;
+
+/* hide buttons before capture */
+
 if(buttons) buttons.style.display="none";
-
-/* detect iOS */
-
-const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-/* OPEN TAB FIRST (important for Safari) */
-
-let newTab:Window|null = null;
-
-if(isIOS){
-newTab = window.open("", "_blank");
-if(newTab){
-newTab.document.write("<p style='font-family:sans-serif;text-align:center;margin-top:40px'>Preparing image...</p>");
-}
-}
-
-/* create canvas */
 
 const canvas = await html2canvas(reportRef.current,{
 scale:3,
@@ -392,33 +410,79 @@ backgroundColor:"#ffffff"
 
 const dataUrl = canvas.toDataURL("image/png");
 
+/* restore buttons */
+
+if(buttons) buttons.style.display="flex";
+
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 if(isIOS){
 
-/* insert image into already opened tab */
+const modal=document.createElement("div");
 
-if(newTab){
-newTab.document.body.innerHTML = `
-<div style="text-align:center;font-family:sans-serif">
-<p>Long press the image and tap <b>Save Image</b></p>
-<img src="${dataUrl}" style="width:100%;max-width:600px"/>
+modal.style.position="fixed";
+modal.style.top="0";
+modal.style.left="0";
+modal.style.width="100%";
+modal.style.height="100%";
+modal.style.background="rgba(0,0,0,0.9)";
+modal.style.zIndex="9999";
+modal.style.display="flex";
+modal.style.alignItems="center";
+modal.style.justifyContent="center";
+modal.style.flexDirection="column";
+
+modal.innerHTML=`
+
+<div style="color:white;margin-bottom:10px">
+Long press image → Save Image
 </div>
+
+<img src="${dataUrl}" style="max-width:90%;border-radius:12px"/>
+
+<div style="color:#ccc;margin-top:10px">
+Returning in <span id="countdown">8</span>s
+</div>
+
 `;
+
+document.body.appendChild(modal);
+
+let seconds=8;
+
+const timer=setInterval(()=>{
+
+seconds--;
+
+const el=document.getElementById("countdown");
+if(el) el.textContent=String(seconds);
+
+if(seconds<=0){
+
+clearInterval(timer);
+
+if(document.body.contains(modal)){
+document.body.removeChild(modal);
 }
+
+}
+
+},1000);
 
 }else{
 
-/* Android + Desktop download */
-
 const link=document.createElement("a");
+
 link.href=dataUrl;
 link.download="mychatscore.png";
+
 document.body.appendChild(link);
+
 link.click();
+
 document.body.removeChild(link);
 
 }
-
-if(buttons) buttons.style.display="flex";
 
 }
 
@@ -431,20 +495,89 @@ alert("Copied!");
 
 /* ---------------- SHARE ---------------- */
 
-function shareReport(){
+async function shareReport(){
+
+if(!reportRef.current) return;
+
+const buttons = document.querySelector(".actionButtons") as HTMLElement;
+
+if(buttons) buttons.style.display="none";
+
+const canvas = await html2canvas(reportRef.current,{
+scale:3,
+backgroundColor:"#ffffff"
+});
+
+const dataUrl = canvas.toDataURL("image/png");
+
+if(buttons) buttons.style.display="flex";
+
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+/* iPhone fallback */
+
+if(isIOS){
+
+const modal=document.createElement("div");
+
+modal.style.position="fixed";
+modal.style.top="0";
+modal.style.left="0";
+modal.style.width="100%";
+modal.style.height="100%";
+modal.style.background="rgba(0,0,0,0.9)";
+modal.style.zIndex="9999";
+modal.style.display="flex";
+modal.style.alignItems="center";
+modal.style.justifyContent="center";
+modal.style.flexDirection="column";
+
+modal.innerHTML=`
+
+<div style="color:white;margin-bottom:10px">
+Long press image → Share or Save
+</div>
+
+<img src="${dataUrl}" style="max-width:90%;border-radius:12px"/>
+
+`;
+
+document.body.appendChild(modal);
+
+setTimeout(()=>{
+if(document.body.contains(modal)){
+document.body.removeChild(modal);
+}
+},8000);
+
+return;
+}
+
+/* Android / Desktop share */
+
+canvas.toBlob(async(blob)=>{
+
+if(!blob) return;
+
+const file = new File([blob],"mychatscore.png",{type:"image/png"});
 
 if(navigator.share){
 
-navigator.share({
-title:"MyChatScore Result",
-text:result
+try{
+
+await navigator.share({
+title:"My Chat Chemistry Score",
+text:"Check my chat chemistry score!",
+files:[file]
 });
 
-}else{
-
-copyReport();
+}catch(err){
+console.log("Share cancelled");
+}
 
 }
+
+});
 
 }
 
@@ -610,7 +743,7 @@ onChange={(e)=>setChatText(e.target.value)}
 
 <section className="resultSection">
 
-<div ref={reportRef} className="resultCard">
+<div ref={reportRef} className="resultCard exportCard">
 
 <h2>MyChatScore Report</h2>
 <div className="chatScore">
@@ -637,34 +770,68 @@ onChange={(e)=>setChatText(e.target.value)}
 
 <div className="graphBlock">
 
-<h3>Conversation Effort</h3>
+<h3>Conversation Dynamics</h3>
 
-<ResponsiveContainer width="100%" height={200}>
-<BarChart data={balanceData}>
-<XAxis dataKey="name"/>
-<Tooltip/>
-<Bar dataKey="value" fill="#22c55e" radius={[8,8,0,0]} />
-</BarChart>
-</ResponsiveContainer>
+<ResponsiveContainer width="100%" height={210}>
+<ComposedChart data={timelineData}>
 
-</div>
+<defs>
 
-<div className="graphBlock">
+<linearGradient id="effortGradient" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stopColor="#22c55e" stopOpacity={1}/>
+<stop offset="100%" stopColor="#22c55e" stopOpacity={0.3}/>
+</linearGradient>
 
-<h3>Interest Timeline</h3>
+<linearGradient id="effortGradient2" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stopColor="#86efac" stopOpacity={1}/>
+<stop offset="100%" stopColor="#86efac" stopOpacity={0.3}/>
+</linearGradient>
 
-<ResponsiveContainer width="100%" height={200}>
-<LineChart data={timelineData}>
-<XAxis dataKey="step"/>
-<Tooltip/>
+</defs>
+
+<CartesianGrid strokeDasharray="2 6" opacity={0.3} />
+
+<XAxis
+dataKey="stage"
+tick={{fontSize:14}}
+axisLine={false}
+tickLine={false}
+/>
+
+<YAxis
+axisLine={false}
+tickLine={false}
+/>
+
+<Tooltip />
+
+<Legend />
+
+<Bar
+dataKey="alexEffort"
+fill="url(#effortGradient)"
+radius={[8,8,0,0]}
+name="Your Effort"
+/>
+
+<Bar
+dataKey="samEffort"
+fill="url(#effortGradient2)"
+radius={[8,8,0,0]}
+name="Their Effort"
+/>
+
 <Line
 type="monotone"
 dataKey="interest"
-stroke="#22c55e"
-strokeWidth={3}
-dot={{ r:5 }}
+stroke="#3b82f6"
+strokeWidth={4}
+dot={{r:5}}
+activeDot={{r:7}}
+name="Interest Trend"
 />
-</LineChart>
+
+</ComposedChart>
 </ResponsiveContainer>
 
 </div>
@@ -680,6 +847,11 @@ dot={{ r:5 }}
 <p>
 Based on engagement signals, they are likely to reply again.
 </p>
+
+</div>
+<div className="reportFooter">
+
+Generated by <strong>MyChatScore.com</strong>
 
 </div>
 
@@ -771,6 +943,10 @@ to better understand the relationship signals in your chat.
 AI insights are generated automatically and may not always be accurate.
 
 </p>
+
+<div className="copyright">
+© 2026 MyChatScore™. All rights reserved.
+</div>
 
 </footer>
 

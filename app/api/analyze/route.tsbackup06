@@ -20,39 +20,24 @@ function isValidConversation(text: string) {
     .map(l => l.trim())
     .filter(l => l.length > 0);
 
-  if (lines.length < 4) return false;
+  if (lines.length < 5) return false;
 
   // ❗ Reject if too many long lines (articles, posts, etc.)
   const longLines = lines.filter(l => l.length > 120).length;
   if (longLines / lines.length > 0.4) return false;
 
-// ❗ RELAX short line check (WhatsApp OCR safe)
-const shortLines = lines.filter(l => l.length < 120).length;
-
-if (shortLines / lines.length < 0.4) {
-  const hasMultiLine = lines.length >= 4;
-  if (!hasMultiLine) return false;
-}
-
+  // ❗ Require multiple short message-like lines
+  const shortLines = lines.filter(l => l.length < 80).length;
+  if (shortLines / lines.length < 0.6) return false;
 
   // ❗ Detect conversational words (stronger)
-// ❗ RELAXED SIGNAL DETECTION (supports Hindi + natural chat)
+  const chatSignals = /(hi|hey|hello|ok|okay|yes|no|hmm|lol|😂|😅|🙂|👍|bro|what|why|how)/i.test(text);
+  if (!chatSignals) return false;
 
-const hasWords = lines.some(l => l.split(" ").length >= 2);
+  // ❗ Detect repetition pattern (real chat has varied lines)
+  const uniqueLines = new Set(lines);
+  if (uniqueLines.size < lines.length * 0.5) return false;
 
-const hasEmotions = /(😂|😅|🙂|👍|lol|haha)/i.test(text);
-
-// allow either meaningful sentences OR emojis/reactions
-if (!hasWords && !hasEmotions) return false;
-  
-const uniqueLines = new Set(lines);
-
-// ❗ RELAX repetition check (WhatsApp safe)
-if (uniqueLines.size < lines.length * 0.3) {
-  const hasSentence = lines.some(l => l.split(" ").length >= 3);
-
-  if (!hasSentence) return false;
-}
   // ❗ Detect back-and-forth pattern (VERY IMPORTANT)
   let alternation = 0;
 
@@ -62,28 +47,18 @@ if (uniqueLines.size < lines.length * 0.3) {
 
   const alternationRatio = alternation / lines.length;
 
-// ❗ RELAXED for WhatsApp OCR
-if (alternationRatio < 0.3) {
-  // allow if we detect at least 2 participants
-  const possibleNames = new Set(
-    lines.map(l => l.split(":")[0]).filter(l => l.length < 20)
-  );
+  if (alternationRatio < 0.6) return false;
 
-  if (possibleNames.size < 2) return false;
-}
+  // ❗ NEW: must have meaningful sentences (not just "ok", "yes")
+  const meaningfulLines = lines.filter(l => l.split(" ").length >= 3);
 
-// ❗ FLEXIBLE SPEAKER DETECTION (WORKS FOR WHATSAPP OCR)
+  if (meaningfulLines.length < 2) return false;
 
-const possibleSpeakers = new Set(
-  lines
-    .map(l => l.split(":")[0].trim())
-    .filter(l => l.length > 0 && l.length < 25)
-);
+  // ❗ NEW: stronger intent detection (questions / reactions)
+  const strongSignals = /(\?|how|why|what|when|😂|😅|🙂|lol|haha)/i.test(text);
 
-// must have at least 2 participants
-if (possibleSpeakers.size < 2) {
-  return false;
-}
+  if (!strongSignals) return false;
+
   return true;
 }
 
