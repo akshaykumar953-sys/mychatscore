@@ -1146,24 +1146,35 @@ text-align:center;
   border-radius:20px !important;
 }
 
-/* remove heavy graph in download */
+/* remove graph */
 .downloadMode .graphBlock{
   display:none !important;
 }
 
-/* make metrics compact */
+/* compact grid */
 .downloadMode .metrics{
   grid-template-columns:repeat(2,1fr) !important;
   gap:10px;
-}
-
-/* smaller text */
-.downloadMode .verdictBox{
-  font-size:13px;
-  padding:14px;
 }
 
 /* reduce spacing */
 .downloadMode .predictionBox{
   padding:18px;
 }
+
+/* 🔥 FIX 1 — BIG SCORE */
+.downloadMode .chatScore strong{
+  font-size:48px !important;
+}
+
+/* 🔥 FIX 2 — HIDE VERDICT */
+.downloadMode .verdictBox{
+  display:none !important;
+}
+
+/* 🔥 FIX 3 — CARD STYLE */
+.downloadMode .metrics div{
+  box-shadow:0 6px 16px rgba(0,0,0,0.08);
+  border:none;
+}
+
