@@ -1167,14 +1167,30 @@ text-align:center;
   font-size:48px !important;
 }
 
-/* 🔥 FIX 2 — HIDE VERDICT */
 .downloadMode .verdictBox{
-  display:none !important;
+  display:block !important;
+  font-size:13px;
+  padding:14px;
+  margin-top:12px;
+  line-height:1.5;
+  background:#f1f5f9;
 }
+
 
 /* 🔥 FIX 3 — CARD STYLE */
 .downloadMode .metrics div{
   box-shadow:0 6px 16px rgba(0,0,0,0.08);
   border:none;
+  padding:12px;            /* 🔥 reduce size */
 }
+
+.downloadMode .metrics strong{
+  font-size:18px;          /* 🔥 smaller numbers */
+}
+
+.downloadMode .metrics p{
+  font-size:12px;
+  color:#64748b;
+}
+
 
