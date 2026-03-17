@@ -953,11 +953,11 @@ onChange={(e)=>setChatText(e.target.value)}
 
 <div className="metrics">
 
-<div>❤️ Interest {interest}</div>
-<div>🙂 Flirting {flirting}</div>
-<div>⚠️ Ghosting {ghosting}</div>
-<div>⚡ Energy {energy}</div>
-<div>🧠 Curiosity {curiosity}</div>
+<div>❤️<p>Interest</p><strong>{interest}</strong></div>
+<div>😉<p>Flirting</p><strong>{flirting}</strong></div>
+<div>⚠️<p>Ghosting</p><strong>{ghosting}</strong></div>
+<div>⚡<p>Energy</p><strong>{energy}</strong></div>
+<div>🧠<p>Curiosity</p><strong>{curiosity}</strong></div>
 
 </div>
 

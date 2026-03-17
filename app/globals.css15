@@ -1193,30 +1193,4 @@ text-align:center;
   color:#64748b;
 }
 
-/* 🔥 COMPACT METRIC CHIPS */
 
-.downloadMode .metrics{
-  display:flex !important;
-  flex-wrap:wrap;
-  justify-content:center;
-  gap:8px;
-}
-
-.downloadMode .metrics div{
-  background:#f1f5f9;
-  padding:8px 12px;
-  border-radius:999px;         /* 🔥 pill shape */
-  font-size:13px;
-  font-weight:600;
-  box-shadow:0 3px 10px rgba(0,0,0,0.08);
-  border:none;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-
-.downloadMode .metrics div:nth-child(1){ color:#ef4444; }
-.downloadMode .metrics div:nth-child(2){ color:#f59e0b; }
-.downloadMode .metrics div:nth-child(3){ color:#f97316; }
-.downloadMode .metrics div:nth-child(4){ color:#3b82f6; }
-.downloadMode .metrics div:nth-child(5){ color:#8b5cf6; }
