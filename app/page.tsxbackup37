@@ -144,7 +144,7 @@ const {you,them}=resolveNames();
 
 function parseValue(label:string){
 
-const regex=new RegExp(`${label}:\\s*([^\\n]+)`);
+const regex=new RegExp(`${label}:\\s*(.*)`);
 
 const match=result.match(regex);
 
@@ -243,16 +243,11 @@ const replyProbability = calculateReplyProbability(interest);
 function isLikelyChat(text: string) {
   const lines = text.split("\n").filter(l => l.trim().length > 0);
 
-  if (lines.length < 3) return false;
+  if (lines.length < 4) return false;
 
-  let hasSpeaker = false;
   let shortLines = 0;
 
   for (const line of lines) {
-    if (/^[A-Z][a-zA-Z]*:/.test(line) || /^[A-Z]:/.test(line)) {
-      hasSpeaker = true;
-    }
-
     if (line.length < 80) shortLines++;
   }
 
@@ -260,12 +255,9 @@ function isLikelyChat(text: string) {
 
   const ratio = shortLines / lines.length;
 
-  // ✅ NEW LOGIC (more flexible)
-  return (
-    hasSpeaker ||               // speaker format exists
-    (ratio > 0.6 && hasChatSignals) // OR casual chat signals
-  );
+  return ratio > 0.6 && hasChatSignals;
 }
+
 
 /* ---------------- ANALYZE CHAT ---------------- */
 
@@ -921,8 +913,8 @@ onChange={handleImageUpload}
 
 <textarea
 rows={6}
-maxLength={5000}
-placeholder="Paste your chat conversation (short chats work best)"
+maxLength={3000}
+placeholder="Paste your chat conversation (max ~300 messages)"
 value={chatText}
 onChange={(e)=>setChatText(e.target.value)}
 />

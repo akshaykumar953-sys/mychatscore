@@ -20,13 +20,7 @@ function isValidConversation(text: string) {
     .map(l => l.trim())
     .filter(l => l.length > 0);
 
-if (lines.length < 3) {
-  // allow if strong speaker pattern exists
-  const speakerLines = lines.filter(l => /^[A-Za-z]+:/.test(l));
-  const uniqueNames = new Set(speakerLines.map(l => l.split(":")[0]));
-
-  if (uniqueNames.size < 2) return false;
-}
+  if (lines.length < 4) return false;
 
   // ❗ Reject if too many long lines (articles, posts, etc.)
   const longLines = lines.filter(l => l.length > 120).length;
@@ -87,27 +81,10 @@ const possibleSpeakers = new Set(
 );
 
 // must have at least 2 participants
-  
-// 🔥 FINAL FALLBACK (DO NOT BREAK EXISTING LOGIC)
-
 if (possibleSpeakers.size < 2) {
-
-  // allow simple "Alex: ..." style chats
-  const simpleSpeakerPattern = lines.filter(l =>
-    /^[A-Za-z]+:/.test(l)
-  );
-
-  const uniqueNames = new Set(
-    simpleSpeakerPattern.map(l => l.split(":")[0])
-  );
-
-  if (uniqueNames.size >= 2) {
-    return true;
-  }
-
   return false;
 }
-return true;
+  return true;
 }
 
 export async function POST(req: Request) {
@@ -156,10 +133,8 @@ const hindiWords = [
 
 const lowerText = chatText.toLowerCase();
 
-const words = lowerText.split(/\s+/);
-
 const matchCount = hindiWords.filter(word =>
-  words.includes(word)
+  lowerText.includes(word)
 ).length;
 
 const isHinglish = matchCount >= 2;
@@ -184,7 +159,7 @@ ${languageInstruction}
 
 FORMAT:
 
-Interest Score: X
+Interest Score: X/100
 Flirting Level: Low/Medium/High
 Ghosting Risk: Low/Medium/High
 Conversation Energy: Low/Medium/High
