@@ -584,11 +584,18 @@ const buttons = document.querySelector(".actionButtons") as HTMLElement;
 
 if(buttons) buttons.style.display="none";
 
+// 🔥 ADD THIS BEFORE CAPTURE
+reportRef.current.classList.add("downloadMode");
+
 const canvas = await html2canvas(reportRef.current,{
-scale:3,
-useCORS:true,
-backgroundColor:"#ffffff"
+  scale:2, // better clarity without huge size
+  useCORS:true,
+  backgroundColor:"#ffffff",
+  windowWidth:500 // force compact width
 });
+
+// 🔥 REMOVE AFTER CAPTURE
+reportRef.current.classList.remove("downloadMode");
 
 const dataUrl = canvas.toDataURL("image/png");
 
@@ -685,10 +692,15 @@ const buttons = document.querySelector(".actionButtons") as HTMLElement;
 
 if(buttons) buttons.style.display="none";
 
+reportRef.current.classList.add("downloadMode");
+
 const canvas = await html2canvas(reportRef.current,{
-scale:3,
-backgroundColor:"#ffffff"
+  scale:2,
+  backgroundColor:"#ffffff",
+  windowWidth:500
 });
+
+reportRef.current.classList.remove("downloadMode");
 
 const dataUrl = canvas.toDataURL("image/png");
 
@@ -957,7 +969,7 @@ onChange={(e)=>setChatText(e.target.value)}
 
 <h3>Conversation Dynamics</h3>
 
-<ResponsiveContainer width="100%" height={210}>
+<ResponsiveContainer width="100%" height={240}>
 <ComposedChart data={timelineData}>
 
 <defs>
@@ -1007,13 +1019,13 @@ name="Their Effort"
 />
 
 <Line
-type="monotone"
-dataKey="interest"
-stroke="#3b82f6"
-strokeWidth={4}
-dot={{r:5}}
-activeDot={{r:7}}
-name="Interest Trend"
+  type="monotone"
+  dataKey="interest"
+  stroke="#2563eb"
+  strokeWidth={3}
+  dot={{r:4, stroke:"#2563eb", strokeWidth:2}}
+  activeDot={{r:6}}
+  name="Interest Trend"
 />
 
 </ComposedChart>
