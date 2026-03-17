@@ -269,22 +269,27 @@ margin-right:auto;
 /* ================= TEXTAREA ================= */
 
 textarea{
-width:100%;
-padding:18px;
-border-radius:12px;
-border:1px solid #e2e8f0;
-font-size:15px;
-resize:none;
-background:#ffffff;
-min-height:150px;
-outline:none;
-transition:.2s;
-box-sizing:border-box;
+  width:100%;
+  padding:16px;
+  border-radius:14px;
+  border:1px solid #e5e7eb;
+  font-size:15px;
+  resize:none;
+  background:#ffffff;
+  min-height:150px;
+  outline:none;
+  transition:all .2s ease;
+  box-sizing:border-box;
+  color:#111827;
+}
+
+textarea::placeholder{
+  color:#9ca3af;
 }
 
 textarea:focus{
-border-color:#22c55e;
-box-shadow:0 0 0 2px rgba(34,197,94,.15);
+  border-color:#22c55e;
+  box-shadow:0 0 0 3px rgba(34,197,94,.12);
 }
 
 /* ================= BUTTONS ================= */

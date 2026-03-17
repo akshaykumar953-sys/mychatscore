@@ -875,18 +875,55 @@ Avi
 
 </div>
 
-<div className="aiBadge">✨ AI Chat Analyzer</div>
+<div style={{
+  display: "inline-block",
+  padding: "6px 14px",
+  borderRadius: "999px",
+  background: "#ecfdf5",
+  color: "#16a34a",
+  fontSize: "13px",
+  fontWeight: 500,
+  marginBottom: "18px"
+}}>
+  ✨ AI Chat Analyzer
+</div>
 
-<h1>Understand Your Chat Instantly</h1>
+<h1 style={{
+  fontSize: "48px",
+  fontWeight: 700,
+  letterSpacing: "-0.03em",
+  color: "#111827",
+  lineHeight: "1.15",
+  marginBottom: "10px"
+}}>
+  Analyze your chat.
+  <br />
+  <span style={{ 
+    color: "#9ca3af", 
+    fontWeight: 500 
+  }}>
+    Interest, flirting & ghosting risk.
+  </span>
+</h1>
 
-<p>
-AI conversation analysis that reveals interest,
-flirting signals, ghosting risk and conversation energy.
+<p style={{
+  color: "#9ca3af",
+  fontSize: "15px",
+  marginTop: "14px",
+  lineHeight: "1.6",
+  maxWidth: "520px",
+  marginInline: "auto"
+}}>
+  AI analysis that reveals interest, flirting signals and reply chances.
 </p>
 
 </section>
 
-<section id="uploadTool" className="toolSection">
+<section 
+  id="uploadTool" 
+  className="toolSection"
+  style={{ marginTop: "40px" }}
+>
 
 <div className="toolCard">
 
@@ -916,13 +953,13 @@ onChange={handleImageUpload}
 </label>
 
 <div className="privacyNote">
-🔒 Private & secure — chats are never stored. AI analyzes them instantly.
+🔒 Your chats stay private. Nothing is stored or saved.
 </div>
 
 <textarea
 rows={6}
 maxLength={5000}
-placeholder="Paste your chat conversation (short chats work best)"
+placeholder="Paste your chat conversation (work best with real and short chats)"
 value={chatText}
 onChange={(e)=>setChatText(e.target.value)}
 />
@@ -934,6 +971,9 @@ onChange={(e)=>setChatText(e.target.value)}
 <button className="secondary" onClick={clearChat}>Clear</button>
 
 <button onClick={analyzeChat}>Analyze Chat</button>
+<p style={{fontSize:"12px", color:"#16a34a", marginTop:"8px"}}>
+  🔥 1,000+ chats analyzed today
+</p>
 
 </div>
 
@@ -1144,10 +1184,9 @@ to better understand the relationship signals in your chat.
 </p>
 
 <p className="footerNote">
-
-AI insights are generated automatically and may not always be accurate.
-
+This tool provides AI-generated insights for entertainment purposes only. Users are responsible for the content they upload.
 </p>
+
 
 <div className="copyright">
 © 2026 MyChatScore™. All rights reserved.
