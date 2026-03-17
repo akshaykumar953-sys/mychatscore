@@ -942,7 +942,7 @@ onChange={(e)=>setChatText(e.target.value)}
 
 <div ref={reportRef} className="resultCard exportCard">
 
-<h2>MyChatScore Report</h2>
+<h2>I analyzed this chat… {interest}/100 😳</h2>
 <div className="chatScore">
 
 🔥 Chat Chemistry Score

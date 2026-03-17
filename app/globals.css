@@ -5,10 +5,12 @@ margin:0;
 padding:0;
 width:100%;
 height:100%;
-font-family:Inter,system-ui,-apple-system;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 background:#f8fafc;
 color:#0f172a;
 overflow-x:hidden;
+-webkit-font-smoothing: antialiased;
+text-rendering: optimizeLegibility;
 }
 
 /* ================= NAVBAR ================= */
@@ -357,8 +359,24 @@ text-align:center;
 }
 
 .resultCard h2{
-margin-bottom:24px;
+  margin-bottom:18px;
+  font-size:26px;       /* slightly bigger */
+  font-weight:700;
+
+  letter-spacing:-0.5px;
+
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+
+  line-height:1.25;
+  text-align:center;
 }
+
+.downloadMode h2{
+  font-size:22px;            /* 🔥 prevents wrapping issues */
+  line-height:1.25;
+}
+
 
 /* ================= METRICS ================= */
 
@@ -805,15 +823,14 @@ font-weight:600;
 }
 
 .chatScore strong{
+  display:block;
+  font-size:36px;
+  margin-top:6px;
 
-display:block;
+  color:#16a34a;
 
-font-size:32px;
-
-margin-top:4px;
-
-color:#16a34a;
-
+  font-weight:800;          /* 🔥 stronger */
+  letter-spacing:-1px;      /* 🔥 tighter = premium */
 }
 
 /* ================= DEMO SECTION ================= */
@@ -1202,14 +1219,16 @@ text-align:center;
   gap:8px;
 }
 
+
 .downloadMode .metrics div{
-  background:#f1f5f9;
+  background:#ffffff;                 /* 🔥 brighter */
   padding:8px 12px;
-  border-radius:999px;         /* 🔥 pill shape */
+  border-radius:999px;
   font-size:13px;
   font-weight:600;
-  box-shadow:0 3px 10px rgba(0,0,0,0.08);
-  border:none;
+  box-shadow:0 6px 18px rgba(0,0,0,0.10); /* 🔥 stronger shadow */
+  border:1px solid #eef2f7;           /* 🔥 adds contrast */
+
   display:flex;
   align-items:center;
   gap:6px;
