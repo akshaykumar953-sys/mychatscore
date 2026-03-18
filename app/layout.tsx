@@ -14,6 +14,13 @@ export const metadata: Metadata = {
   verification: {
     google: "wcmzjGH4SKbgivR2EOofD_SAay9xDnsYkq5ZkxjWxaU",
   },
+  // ✅ ADD THIS BLOCK
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
+
 };
 
 export default function RootLayout({
