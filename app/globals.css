@@ -501,7 +501,7 @@ text-align:center;
 
 color:#64748b;
 
-border-top:1px solid #e2e8f0;
+border-top:1px solid #f3f4f6;
 
 }
 
@@ -1000,60 +1000,127 @@ z-index:999;
 }
 
 .feedbackButton{
-background:#22c55e;
-border:none;
-width:60px;
-height:60px;
-border-radius:50%;
-font-size:22px;
-color:white;
-cursor:pointer;
-box-shadow:0 10px 25px rgba(0,0,0,.2);
+  background:#22c55e;
+  border:none;
+
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  padding:10px 14px;
+  border-radius:999px;
+
+  font-size:14px;
+  font-weight:500;
+  color:white;
+
+  cursor:pointer;
+  box-shadow:0 10px 25px rgba(0,0,0,.2);
+  transition:.2s;
+}
+
+.feedbackButton:hover{
+  transform:translateY(-2px);
 }
 
 .feedbackPanel{
-position:absolute;
-bottom:70px;
-right:0;
-width:260px;
-background:white;
-border-radius:12px;
-padding:16px;
-box-shadow:0 20px 40px rgba(0,0,0,.2);
-display:flex;
-flex-direction:column;
-gap:10px;
+  position:absolute;
+  bottom:80px;
+  right:0;
+
+  width:300px;
+  background:white;
+  border-radius:16px;
+  padding:18px;
+
+  border:1px solid #e5e7eb;
+  box-shadow:0 20px 40px rgba(0,0,0,.15);
+
+  display:flex;
+  flex-direction:column;
+  gap:12px;
 }
 
-.feedbackPanel input,
-.feedbackPanel textarea{
-width:100%;
-padding:8px;
-border-radius:8px;
-border:1px solid #e5e7eb;
-font-size:13px;
+/* ✅ INPUT BASE STYLE (IMPORTANT) */
+.feedbackPanel input{
+  width:100%;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  font-size:13px;
+  outline:none;          /* 🔥 removes black border */
+  box-shadow:none;       /* 🔥 prevents weird focus rings */
+  transition:.2s;
+  background:#ffffff;
+}
+
+/* ✅ INPUT FOCUS */
+.feedbackPanel input{
+  border-color:#22c55e;
+  box-sizing:border-box;
 }
 
 .feedbackPanel textarea{
-min-height:70px;
-resize:none;
+  width:100%;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  font-size:13px;
+  outline:none;
+  min-height:80px;
+  resize:none;
+  transition:.2s;
 }
+
+.feedbackPanel textarea:focus{
+  border-color:#22c55e;
+  box-shadow:0 0 0 2px rgba(34,197,94,.15);
+}
+
 
 .feedbackPanel button{
-background:#22c55e;
-color:white;
-border:none;
-padding:8px;
-border-radius:8px;
-cursor:pointer;
+  background:#22c55e;
+  color:white;
+  border:none;
+  padding:10px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:500;
+}
+
+.feedbackPanel input{
+  transition:.2s;
+  background:#ffffff;
+}
+
+.feedbackPanel input:hover{
+  border-color:#cbd5f5;
 }
 
 .aviText{
-font-size:12px;
-color:#64748b;
-margin-top:-6px;
+  font-size:13px;
+  color:#6b7280;
+  margin-top:-4px;
 }
 
+.aviQuick{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.aviQuick span{
+  background:#f3f4f6;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.aviQuick span:hover{
+  background:#e5e7eb;
+}
 /* AVI GREETING BUBBLE */
 
 .aviGreeting{
@@ -1244,3 +1311,198 @@ text-align:center;
 .downloadMode .metrics div:nth-child(3){ color:#f97316; }
 .downloadMode .metrics div:nth-child(4){ color:#3b82f6; }
 .downloadMode .metrics div:nth-child(5){ color:#8b5cf6; }
+
+
+.insightBlock {
+  margin-top: 20px;
+  padding: 18px;
+  background: #f9fafb;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+}
+
+.insightBlock h3 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.insightItems {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  color: #374151;
+}
+
+
+.featureSection{
+  margin-top:80px;
+  padding:60px 20px;
+  background:#fafafa;
+  border-radius:20px;
+}
+
+.featureTitle{
+  text-align:center;
+  font-size:26px;
+  font-weight:500;
+  margin-bottom:40px;
+  color:#111827;
+}
+
+.featureGrid{
+  display:grid;
+  grid-template-columns:1.6fr 1fr;
+  gap:20px;   /* 🔥 ADD THIS (missing earlier) */
+  max-width:1100px;
+  margin:0 auto;
+}
+
+.featureCard{
+  background:#f9fafb;
+  padding:24px;
+  border-radius:18px;
+  border:1px solid #e5e7eb;
+}
+
+.featureCard.large{
+  grid-row:span 2;
+}
+
+.featureCard h3{
+  font-size:18px;
+  font-weight:600;
+  margin-bottom:8px;
+}
+
+.featureCard p{
+  font-size:14px;
+  color:#6b7280;
+  margin-bottom:16px;
+}
+
+.featureCard img{
+  width:100%;
+  display:block;
+}
+
+/* 🔥 subtle hover (Apple feel) */
+.featureCard:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.imageWrapper{
+  margin-top:14px;
+  border-radius:16px;
+  overflow:hidden;        /* 🔥 important */
+  background:#f3f4f6;     /* soft grey like Venngage */
+}
+
+.featurePoints{
+  margin-top:16px;
+  padding-left:0;
+  list-style:none;
+}
+
+.featurePoints li{
+  font-size:14px;
+  color:#4b5563;
+  margin-bottom:8px;
+}
+
+.featurePointsBox{
+  margin-top:16px;
+  background:#f9fafb;              /* slightly lighter */
+  padding:14px 16px;
+  border-radius:14px;
+  font-size:14px;
+  color:#374151;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+
+  border:1px solid #e5e7eb;        /* 🔥 ADD THIS */
+}
+
+.featurePointsBox div{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.faqSection{
+  margin-top:40px;
+  padding:40px 20px;
+  max-width:800px;
+  margin-inline:auto;
+}
+
+.faqTitle{
+  text-align:center;
+  font-size:32px;
+  font-weight:600;
+  margin-bottom:40px;
+  color:#111827;
+  letter-spacing:-0.02em;
+}
+
+.faqList{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.faqItem{
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  padding:18px 20px;
+  background:#ffffff;
+  cursor:pointer;
+  transition:.25s ease;
+
+  box-shadow:0 1px 2px rgba(0,0,0,0.04); /* 🔥 ADD */
+}
+
+.faqItem:hover{
+  background:#f9fafb;
+  transform:translateY(-1px);
+}
+
+.faqQuestion{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:16px;
+  font-weight:500;
+  color:#111827;
+}
+
+.faqIcon{
+  font-size:18px;
+  color:#9ca3af;
+}
+
+.faqAnswer{
+  margin-top:10px;
+  font-size:14px;
+  color:#6b7280;
+  line-height:1.6;
+
+  max-height:0;
+  overflow:hidden;
+  transition:max-height 0.3s ease;
+}
+
+/* OPEN STATE */
+.faqItem.active .faqAnswer{
+  max-height:300px;
+}
+
+.faqItem.active .faqIcon{
+  transform:rotate(180deg);
+  transition:0.2s;
+}
+

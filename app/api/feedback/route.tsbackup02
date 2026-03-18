@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-let resend: Resend | null = null;
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
 
@@ -11,6 +11,7 @@ export async function POST(req: Request) {
 
     let { email, message } = body;
 
+    // sanitize input
     email = email?.trim();
     message = message?.trim();
 
@@ -37,26 +38,14 @@ export async function POST(req: Request) {
       );
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: "Invalid email" },
         { status: 400 }
       );
-    }
-
-    /* ---------- SAFE INIT ---------- */
-
-    if (!process.env.RESEND_API_KEY) {
-      return NextResponse.json(
-        { error: "Feedback service not configured" },
-        { status: 500 }
-      );
-    }
-
-    if (!resend) {
-      resend = new Resend(process.env.RESEND_API_KEY);
     }
 
     /* ---------- send email ---------- */
