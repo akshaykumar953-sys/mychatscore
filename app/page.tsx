@@ -520,9 +520,10 @@ return;
 
 /* CLEAN OCR TEXT */
 const cleanedLines = extractedText
-  .split("\n")
-  .map(l => l.trim())
-  .filter(l => {
+
+   .split("\n")
+   .map((l: string) => l.trim())
+   .filter((l: string) => {
     if (l.length < 3) return false;
     if (!/[a-zA-Z]{2,}/.test(l)) return false;
     if (/[^a-zA-Z0-9\s.,?!😂😅🙂👍]/.test(l) && l.length < 6) return false;
