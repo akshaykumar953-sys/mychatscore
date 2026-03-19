@@ -595,8 +595,9 @@ if (conversationScore < 2) {
 }
 
 /* FIX: missing in your original code */
+
 const conversationalLines = cleanedLines.filter(
-  l => l.split(" ").length >= 2
+  (l: string) => l.split(" ").length >= 2
 );
 
 if (conversationalLines.length < 3) {
