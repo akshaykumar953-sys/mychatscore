@@ -530,11 +530,11 @@ const cleanedLines = extractedText
     return true;
   });
 
-const hasColonPattern = cleanedLines.some(l =>
+const hasColonPattern = cleanedLines.some((l: string) =>
   /^[A-Z][a-zA-Z]*:/.test(l) || /^[A-Z]:/.test(l)
 );
 
-const hasNamePattern = cleanedLines.some((line, i) => {
+const hasNamePattern = cleanedLines.some((line: string, i: number) => {
   const nextLine = cleanedLines[i + 1];
 
   return (
