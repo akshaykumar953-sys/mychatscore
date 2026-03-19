@@ -647,10 +647,10 @@ if (processedCount === limitedFiles.length) {
 
 }
 
-}catch(err){
+}catch(err:any){
   console.error("OCR error:",err);
 
-  if (err.message === "OCR timeout") {
+  if (err?.message === "OCR timeout") {
     alert("⚠️ Image is unclear or too complex. Try a clear screenshot.");
   } else {
     alert("Failed to read screenshot");
