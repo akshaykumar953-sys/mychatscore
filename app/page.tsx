@@ -353,13 +353,15 @@ setResult("");
 
 async function handleImageUpload(e:any){
 
-const files = Array.from(e.target.files || []).slice(0, 4);
+const files = Array.from(e.target.files || []) as File[];
+const limitedFiles = files.slice(0, 4);
+
 if(!files.length) return;
 
 /* file size limit */
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-for(const file of files){
+for(const file of limitedFiles){
   if(file.size > MAX_FILE_SIZE){
     alert("Screenshot too large. Maximum size is 5MB.");
     return;
@@ -529,7 +531,7 @@ combinedLines.push(...cleanedLines);
 processedCount++;
 
 /* FINAL EXECUTION AFTER ALL FILES */
-if (processedCount === files.length) {
+if (processedCount === limitedFiles.length) {
 
   if (combinedLines.length === 0) {
     alert("❌ Couldn't detect readable chat from screenshots");
