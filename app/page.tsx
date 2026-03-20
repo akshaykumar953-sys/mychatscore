@@ -1001,7 +1001,7 @@ Who is trying more?
 className="aviButton"
 onClick={()=>window.location.href="/"}
 >
-Avi
+Home
 </button>
 
 </header>
