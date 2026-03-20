@@ -1572,4 +1572,117 @@ text-align:center;
   box-shadow: 0 12px 30px rgba(22, 163, 74, 0.08);
 }
 
+/* ================= REPLY FEATURE (PREMIUM) ================= */
 
+/* ================= REPLY FEATURE (APPLE STYLE) ================= */
+
+.replyFeatureSection{
+  margin-top:60px;
+  padding:50px 20px;
+  text-align:center;
+}
+
+/* TITLE */
+.replyTitle{
+  font-size:34px;
+  font-weight:700;
+  letter-spacing:-0.02em;
+  color:#1d1d1f;   /* Apple black */
+  margin-bottom:32px;
+}
+
+/* GRID */
+.replyGrid{
+  display:grid;
+  grid-template-columns:1.3fr 1fr;
+  gap:20px;
+
+  max-width:1100px;
+  margin:auto;
+}
+
+/* CARD */
+.replyCard{
+  background:#ffffff;
+  padding:24px;
+  border-radius:18px;
+
+  border:1px solid #e5e7eb;
+
+  box-shadow:
+    0 4px 20px rgba(0,0,0,0.04);
+
+  text-align:left;
+
+  transition:all .2s ease;
+}
+
+/* HOVER (VERY SUBTLE) */
+.replyCard:hover{
+  transform:translateY(-2px);
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.06);
+}
+
+/* PRIMARY CARD */
+.replyPrimaryCard{
+  grid-row:span 2;
+}
+
+/* DEMO BOX */
+.replyDemoBox{
+  margin-top:16px;
+
+  background:#f9fafb;
+
+  padding:14px;
+  border-radius:12px;
+
+  border:1px solid #e5e7eb;
+
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+/* TAGS */
+.replyTags{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+
+.replyTags span{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+
+  background:#f3f4f6;
+  color:#374151;
+}
+
+/* CTA (APPLE STYLE BUTTON) */
+.replyCTA{
+  margin-top:18px;
+
+  padding:10px 16px;
+
+  border-radius:999px;
+
+  border:none;
+
+  background:#22c55e;
+  color:white;
+
+  font-size:14px;
+  font-weight:500;
+
+  cursor:pointer;
+
+  transition:.2s;
+}
+
+.replyCTA:hover{
+  background:#16a34a;
+}

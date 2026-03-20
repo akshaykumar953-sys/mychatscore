@@ -52,6 +52,9 @@ const [userEmail,setUserEmail]=useState("");
 const [message,setMessage]=useState("");
 const [showGreeting,setShowGreeting] = useState(true);
 const reportRef=useRef<HTMLDivElement>(null);
+const [replyMode, setReplyMode] = useState("flirty");
+const [replies, setReplies] = useState<string[]>([]);
+const [replyLoading, setReplyLoading] = useState(false);
 
 
 useEffect(()=>{
@@ -226,15 +229,24 @@ samEffort:43
 
 /* ---------------- REPLY PROBABILITY ---------------- */
 
-function calculateReplyProbability(interest:string){
+function calculateReplyProbability(interest:string, ghosting:string, energy:string){
 
-const score=parseInt(interest) || 50;
+  const score = parseInt(interest) || 50;
 
-return Math.min(95,Math.max(30,score+10));
+  let probability = score;
 
+  // adjust based on ghosting risk
+  if (ghosting.toLowerCase() === "high") probability -= 30;
+  if (ghosting.toLowerCase() === "medium") probability -= 15;
+
+  // adjust based on energy
+  if (energy.toLowerCase() === "low") probability -= 10;
+  if (energy.toLowerCase() === "high") probability += 10;
+
+  return Math.max(5, Math.min(95, probability));
 }
 
-const replyProbability = calculateReplyProbability(interest);
+const replyProbability = calculateReplyProbability(interest, ghosting, energy);
 
 /* ---------------- CHAT DETECTION (FRONTEND) ---------------- */
 
@@ -321,6 +333,50 @@ try {
 }
 
 }
+
+/* ---------------- GENERATE REPLY ---------------- */
+
+async function generateReplies() {
+
+  if (!chatText.trim()) {
+    alert("Paste chat first");
+    return;
+  }
+
+  setReplyLoading(true);
+  setReplies([]);
+
+  try {
+
+    const res = await fetch("/api/reply", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        text: chatText,
+        mode: replyMode
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Failed to generate replies");
+      return;
+    }
+
+    setReplies(data.replies);
+
+  } catch (err) {
+    alert("Server error");
+  } finally {
+    setReplyLoading(false);
+  }
+}
+
+
+
 /* ---------------- DEMO CHAT ---------------- */
 
 function loadDemoChat(){
@@ -344,32 +400,58 @@ setResult("");
 
 async function handleImageUpload(e:any){
 
-const file = e.target.files[0];
-if(!file) return;
+const files = Array.from(e.target.files || []) as File[];
+const limitedFiles = files.slice(0, 4);
+
+if(!files.length) return;
 
 /* file size limit */
-
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-if(file.size > MAX_FILE_SIZE){
-
-alert("Screenshot too large. Maximum size is 5MB.");
-
-return;
-
+for(const file of limitedFiles){
+  if(file.size > MAX_FILE_SIZE){
+    alert("Screenshot too large. Maximum size is 5MB.");
+    return;
+  }
 }
 
 try{
 
 setLoading(true);
 
-/* convert image to canvas for stable OCR */
+let combinedLines:string[] = [];
+let processedCount = 0;
+
+function finalize(){
+
+  if (combinedLines.length === 0) {
+    alert("❌ Couldn't detect readable chat from screenshots");
+    setLoading(false);
+    return;
+  }
+
+  const cleanedText = combinedLines.join("\n");
+
+  if (cleanedText.length < 20) {
+    alert("❌ No valid chat detected");
+    setLoading(false);
+    return;
+  }
+
+  console.log("OCR OUTPUT:", cleanedText);
+
+  setChatText(cleanedText);
+
+  setLoading(false);
+}
+
+for(const file of limitedFiles){
 
 const img=new Image();
 const reader=new FileReader();
 
 reader.onload=()=>{
-img.src=reader.result as string;
+  img.src=reader.result as string;
 };
 
 reader.readAsDataURL(file);
@@ -385,89 +467,125 @@ let width=img.width;
 let height=img.height;
 
 if(width>MAX_WIDTH){
-height = height*(MAX_WIDTH/width);
-width = MAX_WIDTH;
+  height = height*(MAX_WIDTH/width);
+  width = MAX_WIDTH;
 }
 
 canvas.width=width;
 canvas.height=height;
 
-ctx?.drawImage(img,0,0,width,height);
+if (ctx) {
+  ctx.filter = "contrast(1.4) brightness(1.2)";
+  ctx.drawImage(img, 0, 0, width, height);
+}
 
+let data;
 
-const { data } = await Tesseract.recognize(canvas, "eng");
+try {
+  const result = await Promise.race([
+    Tesseract.recognize(canvas, "eng"),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("OCR timeout")), 7000)
+    )
+  ]);
+
+  data = (result as any).data;
+
+} catch (err:any) {
+  console.log("⏱ OCR skipped:", err.message);
+
+  processedCount++;
+
+  // 🔥 IMPORTANT: trigger final step if last image
+  if (processedCount === limitedFiles.length) {
+    finalize();
+  }
+
+  return;
+}
 
 const extractedText = data.text.trim();
 
-// ❗ OCR QUALITY CHECK (NEW - VERY IMPORTANT)
-const validCharCount = (extractedText.match(/[a-zA-Z]/g) || []).length;
+/* OCR QUALITY CHECK */
+const validCharCount = (extractedText.match(/[a-zA-Z0-9\u0900-\u097F]/g) || []).length;
 const totalCharCount = extractedText.length;
 
 const textQuality = validCharCount / totalCharCount;
 
-// ❌ reject garbage OCR (random images, noise)
-if (textQuality < 0.4) {
-  alert("❌ Unable to detect readable chat in screenshot");
-  setLoading(false);
-  return;
+if (textQuality < 0.25) {
+processedCount++;
+
+if (processedCount === limitedFiles.length) {
+  finalize();
 }
 
-// ❗ BLOCK: report-like structure (fuzzy detection)
+return;
+}
 
+/* BLOCK report-like structure */
 if (
   /mychatscore|chat\s*score|chemistry|reply\s*probability|interest|flirting|ghosting/i.test(extractedText)
 ) {
-  alert("❌ Please upload a real chat, not a report screenshot");
-  setLoading(false);
-  return;
+processedCount++;
+
+if (processedCount === limitedFiles.length) {
+  finalize();
 }
 
-// ❗ BLOCK: very small / unreadable
+return;
+
+}
+
+
+
+/* BLOCK small text */
 if (extractedText.length < 30) {
-  alert("❌ No readable chat detected in screenshot");
-  setLoading(false);
-  return;
+
+processedCount++;
+
+if (processedCount === limitedFiles.length) {
+  finalize();
 }
 
-// ❗ BLOCK: your own report screenshots
+return;
+
+}
+
+/* BLOCK your own report screenshots */
 if (
   /MyChatScore Report|Chat Chemistry Score|Reply Probability|Generated by MyChatScore/i.test(extractedText)
 ) {
-  alert("❌ Please upload an actual chat, not a report screenshot");
-  setLoading(false);
-  return;
+processedCount++;
+
+if (processedCount === limitedFiles.length) {
+  finalize();
 }
 
-// ❗ CLEAN OCR TEXT
+return;
 
+}
+
+/* CLEAN OCR TEXT */
 const cleanedLines = extractedText
-  .split("\n")
-  .map(l => l.trim())
-  .filter(l => {
-    // remove very short junk
+
+   .split("\n")
+   .map((l: string) => l.trim())
+   .filter((l: string) => {
     if (l.length < 3) return false;
-
-    // must contain readable words
     if (!/[a-zA-Z]{2,}/.test(l)) return false;
-
-    // reject weird OCR patterns
     if (/[^a-zA-Z0-9\s.,?!😂😅🙂👍]/.test(l) && l.length < 6) return false;
-
     return true;
   });
-// ❗ REQUIRE CHAT STRUCTURE (speaker pattern)
 
-// ❗ DETECT SPEAKER PATTERN (STRICT + WHATSAPP FALLBACK)
-
-const hasColonPattern = cleanedLines.some(l =>
+const hasColonPattern = cleanedLines.some((l: string) =>
   /^[A-Z][a-zA-Z]*:/.test(l) || /^[A-Z]:/.test(l)
 );
 
-const hasNamePattern = cleanedLines.some((line, i) => {
+const hasNamePattern = cleanedLines.some((line: string, i: number) => {
   const nextLine = cleanedLines[i + 1];
 
   return (
-    /^[A-Z][a-zA-Z]+\s?[A-Z]*[a-zA-Z]*$/.test(line) && // name
+    /^[A-Z][a-zA-Z]+\s?[A-Z]*[a-zA-Z]*$/.test(line) &&
     nextLine &&
     nextLine.length > 3 &&
     !/^[A-Z][a-zA-Z]*:/.test(nextLine)
@@ -475,108 +593,121 @@ const hasNamePattern = cleanedLines.some((line, i) => {
 });
 
 if (!hasColonPattern && !hasNamePattern) {
-  alert("❌ No conversation detected (missing participants)");
-  setLoading(false);
-  return;
+  console.log("⚠️ No clear speaker pattern — continuing");
 }
 
-// ❗ BLOCK: not enough chat-like lines
 if (cleanedLines.length < 4) {
-  alert("❌ No valid chat detected in screenshot");
-  setLoading(false);
-  return;
+processedCount++;
+
+if (processedCount === limitedFiles.length) {
+  finalize();
 }
 
-// ❗ must look like real conversation
-let conversationScore = 0;
+return;
 
+}
+
+let conversationScore = 0;
 let speakerLineCount = 0;
 
 for (let i = 0; i < cleanedLines.length; i++) {
   const line = cleanedLines[i];
 
-  // count speaker lines (A:, B:, Alex:)
   if (/^[A-Z][a-zA-Z]*:/.test(line) || /^[A-Z]:/.test(line)) {
     speakerLineCount++;
   }
 
-if (
-  /\?|😂|😅|🙂|👍/.test(line) ||   // emotion / question
-  line.split(" ").length >= 2 ||  // allow short chats
-  /^[A-Z]:/.test(line)            // allow A:, B:, C:
-) {
-  conversationScore++;
-}
-}
-
-// 🔥 NEW RULE: must have at least 2 speakers interacting
-
-// 🔥 FIX: allow WhatsApp-style chats (no speaker labels)
-
-if (speakerLineCount < 2) {
-
-  // fallback: detect conversation by line variation
-  const uniqueLines = new Set(cleanedLines);
-
-  const hasConversationFlow =
-    cleanedLines.length >= 4 &&
-    uniqueLines.size >= 3;
-
-  if (!hasConversationFlow) {
-    alert("❌ Not enough interaction between participants");
-    setLoading(false);
-    return;
+  if (
+    /\?|😂|😅|🙂|👍/.test(line) ||
+    line.split(" ").length >= 2 ||
+    /^[A-Z]:/.test(line)
+  ) {
+    conversationScore++;
   }
 }
 
-if (conversationScore < 3) {
-  alert("❌ This doesn't look like a real conversation");
-  setLoading(false);
-  return;
+if (speakerLineCount < 2) {
+  const uniqueLines = new Set(cleanedLines);
+  const hasConversationFlow =
+    cleanedLines.length >= 3 &&
+    uniqueLines.size >= 2;
+
+  if (!hasConversationFlow) {
+    console.log("⚠️ Weak interaction — still proceeding");
+  }
 }
 
+if (conversationScore < 2) {
+  console.log("⚠️ Weak conversation signal — continuing");
+}
 
-// ❗ BLOCK: must have conversational lines
+/* FIX: missing in your original code */
+
 const conversationalLines = cleanedLines.filter(
-  l => l.split(" ").length >= 2
+  (l: string) => l.split(" ").length >= 2
 );
 
 if (conversationalLines.length < 3) {
-  alert("❌ This doesn't look like a real conversation");
-  setLoading(false);
-  return;
+
+processedCount++;
+
+if (processedCount === limitedFiles.length) {
+  finalize();
 }
 
-// ✅ FINAL CLEAN TEXT
+return;
 
-// 🔥 STEP 5 — FINAL SAFETY
-
-const cleanedText = cleanedLines.join("\n");
-
-if (cleanedText.length < 20) {
-  alert("❌ No valid chat detected");
-  setLoading(false);
-  return;
 }
 
-setChatText(cleanedText);
+/* ADD TO FINAL RESULT */
+combinedLines.push(...cleanedLines);
 
-setLoading(false);
+processedCount++;
 
-/* important fix */
-e.target.value = "";
+/* FINAL EXECUTION AFTER ALL FILES */
+if (processedCount === limitedFiles.length) {
+
+  if (combinedLines.length === 0) {
+    alert("❌ Couldn't detect readable chat from screenshots");
+    setLoading(false);
+    return;
+  }
+
+  const cleanedText = combinedLines.join("\n");
+
+  if (cleanedText.length < 20) {
+    alert("❌ No valid chat detected");
+    setLoading(false);
+    return;
+  }
+
+  console.log("OCR OUTPUT:", cleanedText);
+
+  setChatText(cleanedText);
+
+  setLoading(false);
+
+  e.target.value = "";
+}
 
 };
 
-}catch(err){
+}
 
-console.error("OCR error:",err);
-alert("Failed to read screenshot");
+}catch(err:any){
+  console.error("OCR error:",err);
 
-setLoading(false);
+  if (err?.message === "OCR timeout") {
+    alert("⚠️ Image is unclear or too complex. Try a clear screenshot.");
+  } else {
+    alert("Failed to read screenshot");
+  }
+
+  setLoading(false);
+}
 
 }
-}
+
 
 /* ---------------- DOWNLOAD REPORT ---------------- */
 
@@ -956,6 +1087,7 @@ Paste chat or upload screenshot • WhatsApp • Tinder • Instagram
 id="chatUpload"
 type="file"
 accept="image/png,image/jpeg,image/jpg"
+multiple
 onChange={handleImageUpload}
 />
 
@@ -1000,7 +1132,7 @@ onChange={(e)=>setChatText(e.target.value)}
 <div ref={reportRef} className="resultCard exportCard">
 
 <h2>I analyzed this chat… {interest}/100 😳</h2>
-<div className="chatScore">
+<div className="chatScore cardInteractive">
 
 🔥 Chat Chemistry Score
 
@@ -1018,45 +1150,78 @@ onChange={(e)=>setChatText(e.target.value)}
 
 </div>
 
-<div className="verdictBox">
+<div className="verdictBox cardInteractive">
 <p>{verdict}</p>
 </div>
 
-<div className="insightBlock">
+<div className="insightBlock cardInteractive">
 
   <h3>Conversation Insights</h3>
 
-  <div className="insightItems">
 
-    <div>🔥 Interest is growing steadily</div>
+<div className="insightItems">
 
-    <div>⚡ Energy is {energy.toLowerCase()}</div>
+  <div>
+    🔥 {
+      parseInt(interest) > 70
+        ? "Strong interest building up"
+        : parseInt(interest) > 40
+        ? "Interest is there, but not strong yet"
+        : "Interest feels low right now"
+    }
+  </div>
 
-    <div>
-      💬 {you} vs {them}: {
-        Math.abs(balanceData[0].value - balanceData[1].value) < 15
-          ? "balanced conversation"
-          : balanceData[0].value > balanceData[1].value
-            ? `${you} is putting more effort`
-            : `${them} is putting more effort`
-      }
-    </div>
+  <div>
+    ⚡ {
+      energy.toLowerCase() === "high"
+        ? "Conversation feels engaging and active"
+        : energy.toLowerCase() === "medium"
+        ? "Conversation is okay, but lacks excitement"
+        : "Low energy — replies feel dry"
+    }
+  </div>
 
+  <div>
+    💬 {
+      Math.abs(balanceData[0].value - balanceData[1].value) < 15
+        ? "Balanced effort, but no one is pushing it forward"
+        : balanceData[0].value > balanceData[1].value
+          ? `${you} is putting more effort`
+          : `${them} is putting more effort`
+    }
   </div>
 
 </div>
 
-<div className="predictionBox">
+
+</div>
+
+<div className="predictionBox cardInteractive">
 
 <h3>Reply Probability</h3>
 
-<div className="predictionScore">
+<div className="predictionScore" style={{
+  color: replyProbability < 40 ? "#ef4444" : "#16a34a"
+}}>
 {replyProbability}%
 </div>
 
 <p>
-Based on engagement signals, they are likely to reply again.
+{replyProbability > 70 && "They are very likely to reply again."}
+{replyProbability > 40 && replyProbability <= 70 && "There’s a decent chance they’ll reply."}
+{replyProbability <= 40 && "Low chance of reply — conversation may fade."}
 </p>
+
+{replyProbability <= 40 && (
+  <p style={{
+    marginTop: "10px",
+    fontSize: "14px",
+    color: "#92400e",
+    fontWeight: 500
+  }}>
+    💡 Suggested move: ask a better question or add some playfulness
+  </p>
+)}
 
 </div>
 <div className="reportFooter">
@@ -1073,11 +1238,34 @@ Generated by <strong>MyChatScore.com</strong>
 
 </div>
 
+{/* 🔥 NEW CTA */}
+<div style={{ marginTop: "14px", textAlign: "center" }}>
+  <button
+    
+onClick={() => {
+  localStorage.setItem("reply_chat", chatText);
+  window.location.href = "/reply";
+}}
+    style={{
+      background: "#111827",
+      color: "#fff",
+      padding: "10px 16px",
+      borderRadius: "10px",
+      border: "none",
+      fontWeight: 500,
+      cursor: "pointer"
+    }}
+  >
+    🔥 Improve your reply
+  </button>
+</div>
+
 </div>
 
 </section>
 
 )}
+
 
 {/* DEMO SECTION */}
 

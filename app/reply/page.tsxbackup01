@@ -1,0 +1,215 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
+export default function ReplyPage() {
+
+  const [chatText, setChatText] = useState("");
+  const [mode, setMode] = useState("auto");
+  const [replies, setReplies] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+
+useEffect(() => {
+  const savedChat = localStorage.getItem("reply_chat");
+
+  if (savedChat) {
+    setChatText(savedChat);
+    localStorage.removeItem("reply_chat"); // optional cleanup
+  }
+}, []);
+
+  async function generateReplies() {
+
+    if (!chatText.trim()) {
+      alert("Paste chat first");
+      return;
+    }
+
+    setLoading(true);
+    setReplies([]);
+
+    try {
+
+      const res = await fetch("/api/reply", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          text: chatText,
+          mode
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Failed");
+        return;
+      }
+
+      setReplies(data.replies);
+
+    } catch {
+      alert("Server error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+
+    <main style={{
+      minHeight: "100vh",
+      background: "#f9fafb",
+      padding: "40px 16px"
+    }}>
+
+      <div style={{
+        maxWidth: "720px",
+        margin: "0 auto"
+      }}>
+
+        {/* HEADER */}
+        <h1 style={{
+          fontSize: "32px",
+          fontWeight: 700,
+          marginBottom: "8px"
+        }}>
+          💬 What should you reply?
+        </h1>
+
+        <p style={{
+          color: "#6b7280",
+          marginBottom: "20px"
+        }}>
+          Paste your chat and get smart replies instantly
+        </p>
+
+        {/* INPUT */}
+        <textarea
+          rows={8}
+          placeholder="Paste your chat here..."
+          value={chatText}
+          onChange={(e) => setChatText(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "14px",
+            borderRadius: "12px",
+            border: "1px solid #e5e7eb",
+            marginBottom: "16px"
+          }}
+        />
+
+        {/* MODE SELECTOR */}
+        <div style={{
+          display: "flex",
+          gap: "8px",
+          flexWrap: "wrap",
+          marginBottom: "16px"
+        }}>
+
+          {["auto", "flirty", "funny", "confident", "smart", "chill", "bold", "rescue"].map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              style={{
+                padding: "8px 14px",
+                borderRadius: "999px",
+                border: "none",
+                cursor: "pointer",
+                background: mode === m ? "#16a34a" : "#e5e7eb",
+                textTransform: "capitalize",
+                color: mode === m ? "#fff" : "#111827"
+              }}
+            >
+              {m}
+            </button>
+          ))}
+
+        </div>
+
+        {/* BUTTON */}
+        <button
+          onClick={generateReplies}
+          style={{
+            width: "100%",
+            background: "#111827",
+            color: "#fff",
+            padding: "12px",
+            borderRadius: "10px",
+            border: "none",
+            fontWeight: 600,
+            cursor: "pointer"
+          }}
+        >
+          Generate Replies
+        </button>
+
+        {/* LOADING */}
+        {loading && (
+          <p style={{
+            marginTop: "12px",
+            color: "#16a34a"
+          }}>
+            ⚡ Generating replies...
+          </p>
+        )}
+
+        {/* OUTPUT */}
+        {replies.length > 0 && (
+
+          <div style={{ marginTop: "20px" }}>
+
+            {replies.map((reply, i) => (
+
+              <div
+                key={i}
+                style={{
+                  padding: "14px",
+                  borderRadius: "12px",
+                  background: "#ffffff",
+                  marginBottom: "12px",
+                  border: "1px solid #e5e7eb",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "10px"
+                }}
+              >
+
+                <p style={{ margin: 0, flex: 1 }}>{reply}</p>
+
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(reply);
+                    alert("Copied!");
+                  }}
+                  style={{
+                    background: "#16a34a",
+                    color: "#fff",
+                    border: "none",
+                    padding: "6px 10px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontSize: "12px"
+                  }}
+                >
+                  Copy
+                </button>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </div>
+
+    </main>
+
+  );
+
+}

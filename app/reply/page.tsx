@@ -1,0 +1,537 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Logo from "../components/Logo";
+
+
+export default function ReplyPage() {
+
+  const [chatText, setChatText] = useState("");
+  const [mode, setMode] = useState("auto");
+  const [replies, setReplies] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [chatOpen,setChatOpen]=useState(false);
+  const [showGreeting,setShowGreeting] = useState(true);
+  const [userEmail,setUserEmail]=useState("");
+  const [message,setMessage]=useState("");
+
+useEffect(() => {
+  const savedChat = localStorage.getItem("reply_chat");
+
+  if (savedChat) {
+    setChatText(savedChat);
+    localStorage.removeItem("reply_chat"); // optional cleanup
+  }
+}, []);
+
+  async function generateReplies() {
+
+    if (!chatText.trim()) {
+      alert("Paste chat first");
+      return;
+    }
+
+    setLoading(true);
+    setReplies([]);
+
+    try {
+
+      const res = await fetch("/api/reply", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          text: chatText,
+          mode
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Failed");
+        return;
+      }
+
+      setReplies(data.replies);
+
+    } catch {
+      alert("Server error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
+/* ---------------- FEEDBACK ---------------- */
+
+async function sendFeedback(){
+
+  if(!message.trim()){
+    alert("Please enter a message");
+    return;
+  }
+
+  if(!userEmail.trim()){
+    alert("Please enter your email");
+    return;
+  }
+
+  try{
+
+    const res = await fetch("/api/feedback",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        email:userEmail,
+        message
+      })
+    });
+
+    const data = await res.json();
+
+    // 🔥 CLEAN ERROR HANDLING (FINAL FIX)
+    if(!res.ok){
+
+      // hide technical backend errors
+      if(data?.error?.includes("configured")){
+        alert("Feedback not available right now 🙏");
+      } else {
+        alert(data.error || "Failed to send feedback");
+      }
+
+      return;
+    }
+
+    // ✅ SUCCESS
+    alert("Thanks! Feedback received 🙌");
+    setUserEmail("");
+    setMessage("");
+    setChatOpen(false);
+
+  }catch(error){
+
+    alert("Something went wrong. Try again.");
+
+  }
+
+}
+
+return (
+
+<main style={{
+  minHeight: "100vh",
+  paddingBottom: "60px",
+  background: `
+    radial-gradient(circle at 20% 20%, rgba(34,197,94,0.12), transparent 40%),
+    radial-gradient(circle at 80% 0%, rgba(59,130,246,0.10), transparent 40%),
+    linear-gradient(to bottom, #f8fafc, #ecfdf5)
+  `
+}}>
+
+  {/* 🔥 NAVBAR */}
+  <header className="navbar">
+
+<Logo />
+
+    <div className="navQuestions">
+      <span>Reply smarter</span>
+      <span>Improve conversations</span>
+    </div>
+
+    <button
+      className="aviButton"
+      onClick={() => window.location.href = "/"}
+    >
+      Home
+    </button>
+
+  </header>
+
+<div style={{
+  maxWidth: "760px",
+  margin: "80px auto",
+  padding: "0 16px"
+}}>
+
+  <div style={{
+    background: "#ffffff",
+    borderRadius: "20px",
+    padding: "28px",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.06)"
+  }}>
+
+
+{/* 🔥 PREMIUM HEADER */}
+<div style={{
+  textAlign: "center",
+  marginBottom: "32px"
+}}>
+
+<h1 style={{
+  fontSize: "42px",
+  fontWeight: 800,
+  letterSpacing: "-0.03em",
+  lineHeight: "1.2",
+  marginBottom: "12px"
+}}>
+
+  <span style={{ color: "#111827" }}>
+    Say the right thing.
+  </span>
+
+  <br />
+
+  <span style={{
+    background: "linear-gradient(90deg, #16a34a, #22c55e)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent"
+  }}>
+    Every time.
+  </span>
+
+</h1>
+  <p style={{
+    fontSize: "15px",
+    color: "#6b7280",
+    maxWidth: "420px",
+    margin: "0 auto",
+    lineHeight: "1.6"
+  }}>
+    AI-generated replies based on your conversation tone, mood, and intent.
+  </p>
+
+</div>
+
+        {/* INPUT */}
+
+
+<textarea
+  rows={8}
+  placeholder="Paste your chat here..."
+  value={chatText}
+  onChange={(e) => setChatText(e.target.value)}
+  style={{
+    width: "100%",
+    padding: "16px",
+    borderRadius: "14px",
+    border: "1px solid #d1d5db",
+    marginBottom: "18px",
+    fontSize: "14px",
+    lineHeight: "1.5",
+    outline: "none",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+    transition: "all 0.2s ease"
+  }}
+  onFocus={(e) => {
+    e.target.style.border = "1px solid #16a34a";
+    e.target.style.boxShadow = "0 0 0 3px rgba(22,163,74,0.15)";
+  }}
+  onBlur={(e) => {
+    e.target.style.border = "1px solid #d1d5db";
+    e.target.style.boxShadow = "0 2px 6px rgba(0,0,0,0.04)";
+  }}
+/>
+
+
+
+
+        {/* MODE SELECTOR */}
+        <div style={{
+          display: "flex",
+          gap: "8px",
+          flexWrap: "wrap",
+          marginBottom: "16px"
+        }}>
+
+          {["auto", "flirty", "funny", "confident", "smart", "chill", "bold", "rescue"].map((m) => (
+          
+<button
+  key={m}
+  onClick={() => setMode(m)}
+
+  onMouseEnter={(e) => {
+    if (mode !== m) {
+      e.currentTarget.style.background = "#d1d5db";
+    }
+  }}
+
+  onMouseLeave={(e) => {
+    if (mode !== m) {
+      e.currentTarget.style.background = "#e5e7eb";
+    }
+  }}
+
+  style={{
+    padding: "8px 14px",
+    borderRadius: "999px",
+    border: "none",
+    cursor: "pointer",
+    background: mode === m ? "#16a34a" : "#e5e7eb",
+    textTransform: "capitalize",
+    color: mode === m ? "#fff" : "#111827",
+    transition: "all 0.15s ease"
+  }}
+>
+  {m}
+</button>
+
+))}
+
+        </div>
+
+        {/* BUTTON */}
+<button
+  onClick={generateReplies}
+  style={{
+    width: "100%",
+    background: "linear-gradient(90deg, #111827, #1f2937)",
+    color: "#fff",
+    padding: "14px",
+    borderRadius: "12px",
+    border: "none",
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    boxShadow: "0 6px 14px rgba(0,0,0,0.15)"
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = "translateY(-1px)";
+    e.currentTarget.style.boxShadow = "0 10px 22px rgba(0,0,0,0.2)";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.15)";
+  }}
+>
+  ⚡ Generate Replies
+</button>
+
+        {/* LOADING */}
+        {loading && (
+          <p style={{
+            marginTop: "12px",
+            color: "#16a34a"
+          }}>
+            ⚡ Generating replies...
+          </p>
+        )}
+
+        {/* OUTPUT */}
+        {replies.length > 0 && (
+
+          <div style={{ marginTop: "20px" }}>
+
+            {replies.map((reply, i) => (
+
+              <div
+                key={i}
+                style={{
+                  padding: "14px",
+                  borderRadius: "12px",
+                  background: "#ffffff",
+                  marginBottom: "12px",
+                  border: "1px solid #e5e7eb",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "10px"
+                }}
+              >
+
+                <p style={{ margin: 0, flex: 1 }}>{reply}</p>
+
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(reply);
+                    alert("Copied!");
+                  }}
+                  style={{
+                    background: "#16a34a",
+                    color: "#fff",
+                    border: "none",
+                    padding: "6px 10px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontSize: "12px"
+                  }}
+                >
+                  Copy
+                </button>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </div>
+      </div>     {/* 🔥 ADD THIS — closes outer container */}
+
+{/* 🔥 FAQ SECTION */}
+
+<section className="faqSection">
+
+  <h2 className="faqTitle">Frequently Asked Questions</h2>
+
+  <div className="faqList">
+
+    {[
+      {
+        q: "Is my chat stored anywhere?",
+        a: "No. Your chats are processed instantly and never stored on our servers."
+      },
+    {
+      q: "How does Reply Assistant work?",
+      a: "It analyzes your conversation and generates smart replies based on tone, intent, and context."
+    },
+    {
+      q: "What tones can I choose?",
+      a: "You can choose from flirty, funny, confident, smart, chill, bold, or let AI decide automatically."
+    },
+    {
+      q: "Can I use this for dating apps?",
+      a: "Yes — it works great for Tinder, WhatsApp, Instagram, and any chat platform."
+    },
+    {
+      q: "Why am I not getting good replies?",
+      a: "Try pasting more context or switch tone modes for better results."
+    }
+
+    ].map((item, i) => (
+
+      <div
+        key={i}
+        className={`faqItem ${openIndex === i ? "active" : ""}`}
+        onClick={() => setOpenIndex(openIndex === i ? null : i)}
+      >
+
+        <div className="faqQuestion">
+          {item.q}
+          <span className="faqIcon">
+            {openIndex === i ? "−" : "+"}
+          </span>
+        </div>
+
+        <div className="faqAnswer">
+          {item.a}
+        </div>
+
+      </div>
+
+    ))}
+
+  </div>
+
+</section>
+
+<footer className="footer">
+
+<p className="footerTitle">Legal</p>
+
+<p className="footerLinks">
+<a href="/about">About</a>
+<a href="/privacy">Privacy</a>
+<a href="/ai-disclaimer">AI Disclaimer</a>
+<a href="/terms">Terms</a>
+
+</p>
+
+<p className="footerNote">
+This tool provides AI-generated insights for entertainment purposes only. Users are responsible for the content they upload.
+</p>
+
+
+<div className="copyright">
+© 2026 MyChatScore™. All rights reserved.
+</div>
+
+</footer>
+
+{/* AI LOADER */}
+
+{loading && (
+
+<div className="loaderOverlay">
+
+<div className="loaderBox">
+
+🤖 AI analyzing...
+
+</div>
+
+</div>
+
+)}
+
+{/* AVI FEEDBACK WIDGET */}
+
+<div className="feedbackWidget">
+
+{/* AVI GREETING */}
+
+{!chatOpen && showGreeting && (
+<div className="aviGreeting">
+👋 Hi, I'm Avi. Need help or want to share feedback?
+</div>
+)}
+
+<button
+  className="feedbackButton"
+  onClick={()=>setChatOpen(!chatOpen)}
+>
+  <span className="aviIcon">💬</span>
+  <span className="aviLabel">Ask Avi</span>
+</button>
+
+{chatOpen && (
+
+<div className="feedbackPanel">
+
+<h4>👋 Hi, I’m Avi</h4>
+<p className="aviText">
+Ask anything about your chat analysis or share feedback.
+</p>
+
+<div className="aviQuick">
+  <span>💡 Why is ghosting high?</span>
+  <span>📊 How is score calculated?</span>
+</div>
+
+<input
+type="email"
+placeholder="your@email.com"
+value={userEmail}
+onChange={(e)=>setUserEmail(e.target.value)}
+/>
+
+<textarea
+placeholder="Your message..."
+maxLength={500}
+value={message}
+onChange={(e)=>setMessage(e.target.value)}
+/>
+
+<div className="charCounter">
+{message.length}/500
+</div>
+
+<button onClick={sendFeedback}>
+Send
+</button>
+
+</div>
+
+)}
+
+</div>
+
+    </main>
+
+  );
+
+}
