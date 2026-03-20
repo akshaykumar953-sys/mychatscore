@@ -10,7 +10,6 @@ export default function ReplyPage() {
   const [mode, setMode] = useState("auto");
   const [replies, setReplies] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [chatOpen,setChatOpen]=useState(false);
   const [showGreeting,setShowGreeting] = useState(true);
@@ -137,33 +136,10 @@ return (
 
 <Logo />
 
-<div className="navQuestions">
-
-  <span
-    className="navLink"
-    onClick={() => {
-      document.getElementById("reply-section")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-    }}
-  >
-    Reply smarter
-  </span>
-
-  <span
-    className="navLink"
-    onClick={() => {
-      document.getElementById("faq-section")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-    }}
-  >
-    Improve conversations
-  </span>
-
-</div>
+    <div className="navQuestions">
+      <span>Reply smarter</span>
+      <span>Improve conversations</span>
+    </div>
 
     <button
       className="aviButton"
@@ -174,14 +150,11 @@ return (
 
   </header>
 
-<div
-  id="reply-section"
-  style={{
-    maxWidth: "760px",
-    margin: "80px auto",
-    padding: "0 16px"
-  }}
->
+<div style={{
+  maxWidth: "760px",
+  margin: "80px auto",
+  padding: "0 16px"
+}}>
 
   <div style={{
     background: "#ffffff",
@@ -231,6 +204,7 @@ return (
   </p>
 
 </div>
+
         {/* INPUT */}
 
 
@@ -310,12 +284,31 @@ return (
 
         {/* BUTTON */}
 <button
-  className="aiButton"
-  style={{ width: "100%" }}
   onClick={generateReplies}
+  style={{
+    width: "100%",
+    background: "linear-gradient(90deg, #111827, #1f2937)",
+    color: "#fff",
+    padding: "14px",
+    borderRadius: "12px",
+    border: "none",
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    boxShadow: "0 6px 14px rgba(0,0,0,0.15)"
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = "translateY(-1px)";
+    e.currentTarget.style.boxShadow = "0 10px 22px rgba(0,0,0,0.2)";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.15)";
+  }}
 >
   ⚡ Generate Replies
 </button>
+
         {/* LOADING */}
         {loading && (
           <p style={{
@@ -350,20 +343,24 @@ return (
 
                 <p style={{ margin: 0, flex: 1 }}>{reply}</p>
 
-<button
-  className={`copyButton ${copiedIndex === i ? "copied" : ""}`}
-  onClick={() => {
-    navigator.clipboard.writeText(reply);
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(reply);
+                    alert("Copied!");
+                  }}
+                  style={{
+                    background: "#16a34a",
+                    color: "#fff",
+                    border: "none",
+                    padding: "6px 10px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontSize: "12px"
+                  }}
+                >
+                  Copy
+                </button>
 
-    setCopiedIndex(i);
-
-    setTimeout(() => {
-      setCopiedIndex(null);
-    }, 1200);
-  }}
->
-{copiedIndex === i ? "✓ Copied" : "📋 Copy"}
-</button>
               </div>
 
             ))}
@@ -371,12 +368,14 @@ return (
           </div>
 
         )}
-</div>
+
       </div>
+      </div>     {/* 🔥 ADD THIS — closes outer container */}
 
 {/* 🔥 FAQ SECTION */}
 
-<section id="faq-section" className="faqSection">
+<section className="faqSection">
+
   <h2 className="faqTitle">Frequently Asked Questions</h2>
 
   <div className="faqList">
