@@ -1153,7 +1153,7 @@ onChange={(e)=>setChatText(e.target.value)}
 
 <button onClick={analyzeChat}>Analyze Chat</button>
 <p style={{fontSize:"12px", color:"#16a34a", marginTop:"8px"}}>
-  🔥 1,000+ chats analyzed today
+  🔥 1,500+ chats analyzed today
 </p>
 
 </div>
